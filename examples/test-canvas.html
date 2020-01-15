@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<meta charset=utf-8 />
+<script src="nav.js"></script>
+<link rel="stylesheet" href="example.css" />
+<script src="/Textbox.js"></script>
+
+<h1>Rendering to a canvas</h1>
+<canvas style="border: 1px solid #888"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const dpr = window.devicePixelRatio || 1;
+const ctx = canvas.getContext('2d');
+const width = 480;
+const height = 220;
+
+// high pixel density devices
+canvas.width = (width + 20) * dpr;
+canvas.height = (height + 20) * dpr;
+canvas.style.width = (width + 20)  + 'px';
+canvas.style.height = (height + 20) + 'px';
+ctx.scale(dpr, dpr);
+ctx.translate(10, 10);
+
+// borders
+ctx.save();
+ctx.strokeStyle = '#f00';
+ctx.setLineDash([ 2, 2 ]);
+ctx.strokeRect(0, 0, width, height);
+ctx.restore();
+
+// formatter
+const box = new Textbox({
+  width: width,
+  height: height,
+  parser: 'html',
+  font: '16px/22px Tahoma, sans-serif'
+});
+
+fetch('./text/canvas.html')
+  .then(d => d.text())
+  .then(d => box.render(d, ctx));
+</script>
+
+<div id="about">
+<p>This example demonstates a how text is rendered to canvas in the most simple way. Most of the code to generate this deals with setting up the canvas and the border. Here is what is needed when the extras have been removed:</p>
+<pre>
+const canvas = document.querySelector('canvas');
+canvas.width = 480;
+canvas.height = 220;
+
+const box = new Textbox({
+  width: canvas.width,
+  height: canvas.height,
+  parser: 'html',
+  font: '16px/22px Tahoma, sans-serif'
+});
+
+fetch('./text/canvas.html')
+  .then(d => d.text())
+  .then(html => box.render(html, canvas.getContext('2d')));
+</pre>
+</div>

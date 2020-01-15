@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<meta charset=utf-8 />
+<script src="nav.js"></script>
+<link rel="stylesheet" href="example.css" />
+<script src="/Textbox.js"></script>
+<body>
+
+<h1>Text within a doughnut</h1>
+
+<svg height="420" width="420">
+  <rect height="420" width="420" fill="white" />
+  <g transform="translate(210, 210)" id="donut">
+    <circle r="200" fill="rebeccapurple" />
+    <circle r="175" fill="white" />
+  </g>
+</svg>
+
+<script>
+const lorem = "Lorem ipsum dolor sit amet, \
+con­sect­etur adi­pisic­ing elit, sed do eius­mod \
+tempor in­cidi­dunt ut labore et dolore magna \
+aliqua. Ut enim ad minim veniam, \
+quis nost­rud exer­cita­tion ullamco lab­oris \
+nisi ut ali­quip ex ea commodo \
+con­se­quat. Duis aute irure dolor in \
+re­pre­hende­rit in volup­tate velit esse\
+cillum dolore eu fugiat nulla pari­atur. \
+Ex­cept­eur sint occa­ecat cupi­datat non\
+proi­dent, sunt in culpa qui offi­cia \
+dese­runt mollit anim id est laborum.";
+
+const radius = 160;
+const lineheight = 24;
+const font = `17px/${lineheight}px Helvetica, sans-serif`;
+
+const box = new Textbox({
+  font: font,
+  height: radius * 2,
+  // render text as if left-aligned
+  align: 'left',
+  width: i => {
+    const r = radius;
+    const lines = r * 2 / lineheight;
+    const d = (r / (lines / 2) * (i + 0.7)) - r;
+    return Math.floor(2 * Math.sqrt(r * r - d * d));
+  }
+});
+
+const donut = document.getElementById('donut');
+const text = box.render(lorem);
+text.setAttribute('y', -radius + 6);
+// switch the text element to centering
+text.setAttribute('text-anchor', 'middle');
+donut.appendChild(text);
+</script>
+
+<div id="about">
+<p>This demonstrates per-line width control. This extra control allows the creation of slighly more complicated layouts, such as this disc-shape.</p>
+<p>In this example a callback provides each line with the with of the appropriate chord length, which then line-breaks and hyphenates the text to form a disc.</p>
+<p>Also shown here is how text is automatically overflowed into an ellipsis if height is provided and the text does not fit the area.</p>
+</div>
+
+</body>

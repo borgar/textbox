@@ -1,0 +1,12 @@
+{
+  extends: ['@borgar/eslint-config'],
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
+  },
+  rules: {
+    "import/export": "error",
+    "import/no-unresolved": "error"
+  },
+  plugins: [ 'import' ]
+}

@@ -1,0 +1,22 @@
+body {
+  background: #fff;
+  font-family: sans-serif;
+}
+
+h1 {
+  margin: 0 0 .4em 0;
+}
+
+#about {
+  width: 660px;
+}
+
+nav {
+  border-bottom : 1px solid #ccc;
+  margin-bottom : 1em;
+  padding : 0 0 .5em 0;
+}
+
+nav a, nav b {
+  margin-right : 1em;
+}

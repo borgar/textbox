@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<meta charset=utf-8 />
+<script src="nav.js"></script>
+<script src="/Textbox.js"></script>
+
+<link rel="stylesheet" href="example.css" />
+
+<style>
+form {
+  font-size: 12px;
+  float : left;
+}
+fieldset {
+  margin-bottom: .5em;
+  width : 20em;
+  border : 1px solid #aaa;
+}
+label {
+  display: block;
+}
+label span {
+  display: inline-block;
+  text-align: right;
+  width : 6em;
+  margin-right: .5em;
+}
+label + label { margin-top: .5em; }
+label, input { vertical-align: middle; }
+
+/* svg styles */
+svg {
+  margin: .5em 0 .5em 1em;
+  border : 1px solid #ccc;
+}
+.svg {
+  font: 12px sans-serif;
+  fill: #ccc;
+}
+.frame {
+  stroke: red;
+  stroke-dasharray : 2;
+  fill: none;
+}
+.workspace {
+  fill: #eee;
+}
+circle {
+  fill: pink;
+  stroke: red;
+  stroke-width : .7;
+}
+
+/**/
+canvas {
+  margin: .5em 0 .5em 1em;
+  border : 1px solid #ccc;
+}
+
+/* axis*/
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.x.axis line {
+  stroke: #fff;
+}
+
+.x.axis .minor {
+  stroke-opacity: .5;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.y.axis line, .y.axis path {
+  fill: none;
+  stroke: #000;
+}
+
+/* basic text styles*/
+svg a {
+  fill: blue;
+  text-decoration: underline;
+}
+</style>
+<body>
+<h1>Layout options tester</h1>
+<form onchange="update();">
+<fieldset>
+  <legend>Box</legend>
+
+  <label>
+    <span>Text</span>
+    <select name="text" id="text">
+      <option value="text.txt" >Lorem text</option>
+      <option value="short.txt">Short text</option>
+      <option value="tough.html">Tough breaks</option>
+      <option value="html.html">Lorem HTML</option>
+      <option value="latex.tex">Lorem LaTeX</option>
+      <option value="lines.html" selected>Some lines</option>
+    </select>
+  </label>
+
+  <label>
+    <span>Width</span>
+    <input type="range" value="200" min="0" max="300" step="1"
+        oninput="update();" id="width" name="width">
+  </label>
+
+  <label>
+    <span>Height</span>
+    <input type="range" value="221" min="0" max="300" step="1"
+        oninput="update();" id="height" name="height">
+  </label>
+
+</fieldset>
+<fieldset>
+  <legend>Font &amp; layout</legend>
+
+  <label>
+    <span>Font</span>
+    <select id="font" name="font">
+      <option value="Helvetica, sans-serif" selected>Helvetica</option>
+      <option value="Georgia, serif" >Georgia</option>
+      <option value='"Comic Sans MS", cursive, sans-serif'>Comic Sans</option>
+      <option value="Verdana, Geneva, sans-serif" >Verdana</option>
+      <option value='Palatino'>Palatino</option>
+      <option value='Courier New, monospace'>Courier New</option>
+      <option value='Monaco, monospace'>Monaco</option>
+      <option value='Consolas, monospace'>Consolas</option>
+      <option value='"Lucida Console", Monaco, monospace'>Monospace</option>
+    </select>
+  </label>
+
+  <label>
+    <span>Size</span>
+    <input type="range" value="13" min="10" max="20" step="1" oninput="update();" id="size" name="size">
+  </label>
+
+  <label>
+    <span>Leading</span>
+    <input type="range" value="17" min="10" max="24" step="1" oninput="update();" id="leading" name="leading">
+  </label>
+
+  <label>
+    <span>Align</span>
+    <select id="align" name="align">
+      <option value="left" selected>Left</option>
+      <option value="center">Center</option>
+      <option value="right">Right</option>
+      <option value="justify">Justify</option>
+    </select>
+  </label>
+
+  <label>
+    <span>Vert. align</span>
+    <select id="gravity" name="gravity">
+      <option value="top" selected>Top</option>
+      <option value="middle">Middle</option>
+      <option value="bottom">Bottom</option>
+    </select>
+  </label>
+
+</fieldset>
+<fieldset>
+  <legend>Rotation</legend>
+
+  <label>
+    <span>Horiz. anchor</span>
+    <select id="halign" name="halign">
+      <option value="left">Left</option>
+      <option value="center" selected>Center</option>
+      <option value="right">Right</option>
+    </select>
+  </label>
+
+  <label>
+    <span>Vert. anchor</span>
+    <select id="valign" name="valign">
+      <option value="top">Top</option>
+      <option value="middle" selected>Middle</option>
+      <option value="bottom">Bottom</option>
+    </select>
+  </label>
+
+  <label>
+    <span>Angle</span>
+    <input type="range" value="0" min="-180" max="180" step="0" oninput="update();" id="rotate" name="rotate">
+  </label>
+
+</fieldset>
+</form>
+
+<div id="fig">
+  <svg width="320" height="320">
+    <g transform="translate(10,10)">
+      <rect class="workspace" width="300" height="300" />
+      <text class="svg" x="5" y="295">SVG</text>
+      <g transform="translate(150,150)">
+        <g id="textbox"></g>
+        <rect id="bbox" class="frame" />
+      </g>
+      <circle r="3" transform="translate(150,150)" />
+    </g>
+  </svg>
+  <canvas width="300" height="300"></canvas>
+</div>
+
+<script>
+/* globals d3 */
+/* eslint-disable indent */
+const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+const width = 300;
+const height = 300;
+
+const texts = {};
+const extToParser = {
+  'txt': Textbox.textparser,
+  'html': Textbox.htmlparser,
+  'tex': Textbox.latexparser
+};
+
+const canvas = document.querySelector('canvas');
+const dpr = window.devicePixelRatio || 1;
+canvas.style.width = (width + margin.left + margin.right) + 'px';
+canvas.width = (width + margin.left + margin.right) * dpr;
+canvas.style.height = (height + margin.top + margin.bottom) + 'px';
+canvas.height = (height + margin.top + margin.bottom) * dpr;
+const context = canvas.getContext('2d');
+
+function val (id, fn) {
+  const v = document.querySelector('#' + id).value;
+  return (fn || String)(v);
+}
+
+let _saveTimer;
+function save () {
+  const form = document.querySelector('form');
+  const data = new FormData(form);
+  const s = [];
+  for (let k of data.keys()) {
+    s.push(k + '=' + encodeURIComponent(data.get(k)));
+  }
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    history.replaceState(undefined, undefined, "#" + s.sort().join('&'));
+  }, 150);
+}
+
+function loadUrlParams () {
+  location.hash.replace(/^#/, '').split('&').forEach(p => {
+    const [ k, v ] = p.split('=', 2);
+    if (!k) return;
+    const elm = document.querySelector('[name='+k+']');
+    elm.value = decodeURIComponent(v);
+  });
+}
+
+function update () {
+  let deg = val('rotate', Number);
+  const w = val('width', Number);
+  const h = val('height', Number);
+  const l = val('leading', Number);
+  const f = val('size', Number);
+
+  const t = val('text');
+  const passage = texts[t].replace(/\^([- ])/g, (a, m) => {
+    // transform "^ " and "^-" to non-break and soft-hyphen
+    return String.fromCharCode(m.charCodeAt(0) + 128);
+  });
+  const parser = extToParser[t.split('.')[1]];
+  // const text = d3.select('#text').node().value.split('.');
+
+  save();
+
+  // snap rotation to 0
+  if (Math.abs(deg) < 10) {
+    deg = 0;
+    document.querySelector('#rotate').value = deg;
+  }
+
+  const rot = new Textbox.Rotator({
+    width: w,
+    height: h,
+    rotate: deg,
+    anchor: `${val('valign')} ${val('halign')}`
+  });
+
+  // configure text layout
+  const box = new Textbox({
+    width: w,
+    height: h,
+    valign: val('gravity'),
+    align: val('align'),
+    parser: parser,
+    font: `${f}px/${l}px ${val('font')}`
+  });
+
+  const textbox = document.querySelector('#textbox');
+  textbox.innerHTML = '';
+  textbox.appendChild(rot.render(box.render(passage)));
+
+  // draw a bounding frame
+  const anchor = rot.anchor();
+  const frame = document.querySelector('#bbox');
+  frame.setAttribute('width', w);
+  frame.setAttribute('height', h);
+  frame.setAttribute('x', anchor[0]);
+  frame.setAttribute('y', anchor[1]);
+  frame.setAttribute('transform', `rotate(${rot.rotate()})`);
+
+  // render canvas
+  context.save();
+  context.scale(dpr, dpr);
+  context.fillStyle = '#fff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.translate(margin.left, margin.top);
+
+  // workspace
+  context.fillStyle = '#eee';
+  context.fillRect(0, 0, width, height);
+  context.font = '12px sans-serif';
+  context.fillStyle = '#ccc';
+  context.fillText('CANVAS', 5, height - 5);
+
+  context.translate(width / 2, height / 2);
+
+  rot.render(ctx => {
+    box.render(ctx, passage);
+
+    context.strokeStyle = 'red';
+    context.strokeDashArray = '2 2';
+    context.setLineDash([ 2, 2 ]);
+    context.strokeRect(0, 0, w, h);
+  }, context);
+
+  context.strokeStyle = 'red';
+  context.fillStyle = 'pink';
+  context.beginPath();
+  context.ellipse(0, 0, 3, 3, 0, 0, 2 * Math.PI);
+  context.stroke();
+  context.fill();
+
+  context.restore();
+}
+
+loadUrlParams();
+
+Promise.all(
+  Array.from(document.querySelectorAll('#text option'))
+    .map(o => fetch('text/'+ o.value).then(d => d.text()).then(d => [ o.value, d ]))
+)
+.then(d => {
+  d.reduce((a, c) => {
+    a[c[0]] = c[1];
+    return a;
+  }, texts);
+})
+.then(update);
+
+
+    </script>
+
+  </body>
+</html>

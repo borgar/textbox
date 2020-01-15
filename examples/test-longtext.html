@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<meta charset=utf-8 />
+<script src="nav.js"></script>
+<link rel="stylesheet" href="example.css" />
+<script src="Textbox.js"></script>
+<body>
+<h1>Long text on SVG and canvas</h1>
+<style>
+svg, canvas {
+  border: 1px solid #888;
+  margin-right: 8px;
+}
+</style>
+<div id="output"></div>
+<form style="margin-top: 10px;"><b>Align text:</b>
+<label><input type="radio" name="align" value="left" /> Left</label>
+<label><input type="radio" name="align" value="center" /> Center</label>
+<label><input type="radio" name="align" value="right" /> Right</label>
+<label><input type="radio" name="align" checked value="justify" /> Justify</label>
+</form>
+<script>
+const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+let text = '';
+
+const width = 400;
+const fontSize = 16;
+const lineHeight = fontSize * 1.5;
+
+const form = document.querySelector('form');
+const output = document.querySelector('#output');
+
+function render () {
+  const align = new FormData(form).get('align');
+  output.innerHTML = '';
+
+  const box = new Textbox({
+    font: `${fontSize}px/${lineHeight}px sans-serif`,
+    align: align,
+    width: width,
+    parser: Textbox.htmlparser
+  });
+  const lines = box.linebreak(text);
+
+  const height = lines.height;
+  const w = width + margin.left + margin.right;
+  const h = height + margin.top + margin.bottom;
+
+  // ====
+  // Render the text on a canvas
+  // ====
+
+  const dpr = window.devicePixelRatio || 1;
+  const canvas = output.appendChild(document.createElement('canvas'));
+  const context = canvas.getContext('2d');
+  canvas.style.width = w + 'px';
+  canvas.width = w * dpr;
+  canvas.style.height = h + 'px';
+  canvas.height = h * dpr;
+  context.scale(dpr, dpr);
+  // red-border
+  context.save();
+  context.strokeStyle = '#f00';
+  context.setLineDash([ 2, 2 ]);
+  context.strokeRect(10, 10, width, height);
+  context.restore();
+  // render text
+  context.translate(10, 10);
+  lines.render(context);
+
+  // ====
+  // Render the text as an SVG
+  // ====
+
+  const createElement = Textbox.createElement;
+  const svg = createElement('svg', {
+    width: w,
+    height: h,
+  },
+    createElement('rect', {
+      stroke: 'red',
+      strokeDasharray: '2 2',
+      fill: 'none',
+      x: margin.left,
+      y: margin.top,
+      width: width,
+      height: height
+    }),
+    createElement('g', { transform: `translate(${margin.left},${margin.top})` },
+      lines.render()
+    )
+  );
+  svg.style.display = 'inline-block';
+  svg.style.verticalAlign = 'top';
+  output.appendChild(svg);
+};
+
+fetch('text/longtext.html')
+  .then(d => d.text())
+  .then(d => {
+    text = d.trim().replace(/~/g, '&shy;');
+    form.addEventListener('change', render);
+    render();
+  });
+
+</script>
+<div id="about">
+<p>This example renders a longer passage of text as both an SVG and a Canvas drawing.
+It was made to view how linebreaks affect justified text, the last line of a paragraph should not stretch across the line.
+Can you tell which is which?</p>
+</div>
+
+</body>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<meta charset=utf-8 />
+<script src="nav.js"></script>
+<link rel="stylesheet" href="example.css" />
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="Textbox.js"></script>
+<style>
+svg a {
+  fill: blue;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+<body>
+<h1>HTML syntax support</h1>
+<div id="output"></div>
+<script>
+const margin = { top: 1, right: 1, bottom: 1, left: 1 };
+const width = 600;
+
+// set up a Textbox taking HTML input and emitting React output
+const box = new Textbox({
+  font: '14px/18px sans-serif',
+  width: width,
+  parser: Textbox.htmlparser,
+  createElement: React.createElement
+});
+
+fetch('./text/html-example.html')
+  .then(d => d.text())
+  .then(text => {
+
+    // linebreak the text - this is done first to attain the height
+    const lines = box.linebreak(text);
+
+    // render the resulting SVG using React
+    const createElement = React.createElement;
+    const svg = createElement('svg', {
+      width: width + margin.left + margin.right,
+      height: lines.height + margin.top + margin.bottom
+    }, createElement('g', { transform: `translate(${margin.left},${margin.top})` },
+        lines.svg()
+      )
+    );
+    ReactDOM.render(svg, document.querySelector('#output'));
+  });
+</script>
+
+<div id="about">
+<p>These are some examples of the rudimentary parser for basic HTML syntax. The parser is limited to roughly the things you would expect <a href="https://www.w3.org/TR/html401/struct/text.html#h-9.2">inline</a> HTML to be able to do, <code>&lt;b></code>, <code>&lt;i></code>, and such. Although some block tags like <code>&lt;div></code> or <code>&lt;p></code>can be used to create linebreaks.</p>
+<p>If you are rendering to SVG, you will need to supply styles to hyperlinks:</p>
+<pre>
+svg a {
+  fill: blue;
+  text-decoration: none;
+  cursor: pointer;
+}
+</pre>
+<p>One caveat is that, due to the nature of svg text, links that linebreak are not single elements, thus hover styles will only affect the half of the link that the user is interacting with. Justification will also mess underlines upp.</p>
+<p>This example uses <a href="https://reactjs.org/">React</a> to render the SVG.</p>
+</div>
+
+</body>

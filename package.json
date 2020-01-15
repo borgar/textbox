@@ -1,0 +1,44 @@
+{
+  "name": "@borgar/textbox",
+  "description": "A utility to render formatted multi-line rich text.",
+  "version": "1.0.0",
+  "license": "BSD",
+  "main": "dist/textbox.js",
+  "scripts": {
+    "build": "webpack-cli --mode=production",
+    "dev": "webpack-dev-server --mode=development",
+    "lint": "eslint lib/",
+    "start": "nodemon -w lib/ -x \"tape -r @babel/register 'lib/**/*-test.js' 'lib/*-test.js'\" |tap-min",
+    "test": "tape -r @babel/register 'lib/**/*-test.js' 'lib/*-test.js' |tap-min"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:borgar/rtext.git"
+  },
+  "keywords": [
+    "text",
+    "format",
+    "formatted",
+    "rich-text",
+    "canvas",
+    "svg"
+  ],
+  "author": "Borgar <borgar@borgar.net>",
+  "devDependencies": {
+    "@babel/core": "~7.7.5",
+    "@babel/plugin-proposal-export-default-from": "~7.7.4",
+    "@babel/preset-env": "~7.7.6",
+    "@babel/register": "~7.7.4",
+    "@borgar/eslint-config": "~1.1.0",
+    "babel-loader": "~8.0.6",
+    "core-js": "~3.5.0",
+    "eslint": "~6.7.2",
+    "eslint-plugin-import": "~2.19.1",
+    "regenerator-runtime": "~0.13.3",
+    "tap-min": "~2.0.0",
+    "tape": "~4.12.0",
+    "webpack": "~4.41.3",
+    "webpack-cli": "~3.3.10",
+    "webpack-dev-server": "~3.9.0"
+  }
+}
