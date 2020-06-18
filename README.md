@@ -120,13 +120,13 @@ As well as a list of lines of tokens, the lines object has a height property whi
 The lines object additionally has a render method so you can pass it on without having the originating Textbox instance.
 
 ```js
-# No height is set to the box
+// No height is set to the box
 const box = new Textbox({ width: 150 });
-# Text is turned into lines
+// Text is turned into lines
 const lines = box.linebreak( longTextPassage );
-# Destination canvas is set to the height of the output
+// Destination canvas is set to the height of the output
 myCanvas.height = lines.height;
-# Lines are rendered to the canvas
+// Lines are rendered to the canvas
 lines.render( myCanvas );
 ```
 
