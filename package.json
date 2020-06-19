@@ -1,7 +1,7 @@
 {
   "name": "@borgar/textbox",
   "description": "A utility to render formatted multi-line rich text.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "BSD",
   "main": "dist/textbox.js",
   "scripts": {
@@ -39,6 +39,6 @@
     "tape": "~4.12.0",
     "webpack": "~4.41.3",
     "webpack-cli": "~3.3.10",
-    "webpack-dev-server": "~3.9.0"
+    "webpack-dev-server": "~3.11.0"
   }
 }
