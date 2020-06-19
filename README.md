@@ -90,6 +90,11 @@ Sets text vertical alignment. Accepts all values you would expect CSS `vertical-
 Sets text overflow mark, similar to CSS `text-overflow`. The keyword `ellipsis` will set the overflow mark to `…`, otherwise the provided string is used as-is.
 
 
+<a name="overflowline" href="#overflowline">#</a> .**overflowLine**( _indicator_ )
+
+Sets text per-line overflow mark, similar to `.overflow`. This setting is off by default. The keyword `ellipsis` will set the overflow mark to `…`, otherwise the provided string is used as-is.
+
+
 <a name="parser" href="#parser">#</a> .**parser**( _parser_ )
 
 Selects which text parser to use. The available parsers are:
