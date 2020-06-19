@@ -8,7 +8,7 @@ module.exports = {
   output: {
     libraryTarget: 'umd',
     libraryExport: 'default',
-    library: 'textbox',
+    library: 'Textbox',
     filename: 'textbox.js',
     globalObject: 'this'
   },
