@@ -95,6 +95,11 @@ Sets text overflow mark, similar to CSS `text-overflow`. The keyword `ellipsis` 
 Sets text per-line overflow mark, similar to `.overflow`. This setting is off by default. The keyword `ellipsis` will set the overflow mark to `…`, otherwise the provided string is used as-is.
 
 
+<a name="overflowwrap" href="#overflowwrap">#</a> .**overflowWrap**( _indicator_ )
+
+Sets whether textbox should line-break within a word to prevent text from overflowing. This setting is `normal` by default which allows words to exceed the current line-width (unless line-overflow is set). Alternatively it may be set to `break-word` which will force a break mid-words.
+
+
 <a name="parser" href="#parser">#</a> .**parser**( _parser_ )
 
 Selects which text parser to use. The available parsers are:
@@ -106,6 +111,7 @@ Selects which text parser to use. The available parsers are:
 Textbox will look for a parser on the instance first, then default to `Textbox.defaultparser`. So you if you know that you will exclusively be using the HTML parser, you can change the default once:
 
     Textbox.defaultparser = Textbox.htmlparser;
+
 
 <a name="createElement" href="#createElement">#</a> .**createElement**( _element_factory_ )
 
