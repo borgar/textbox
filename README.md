@@ -180,7 +180,7 @@ Textbox.measureText("Lorem Ipsum", "bold 15px/20px sans-serif");
 
 1. Text justification is fairly broken in SVG. Avoid it for formatted text.
 
-   1. Justification does now work consistently in all browsers as they have buggy support for the `word-spacing` property. Google Chrome seems to work fine, Safari works for plain text but incorrectly for formatted text. Firefox is lost in the woods.
+   1. Justification does not work consistently in all browsers as they have buggy support for the `word-spacing` property. Google Chrome seems to work fine, Safari works for plain text but incorrectly for formatted text. Firefox is lost in the woods.
 
    1. Because of the way text handling is done in SVG, justifying underlined text will create gaps in the underlined text.
 
