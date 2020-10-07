@@ -2,6 +2,8 @@
 
 Textbox is a simple library to layout text for display on SVG or Canvas. It can fairly decently line-break and render rich text given some boundaries. It understands simple text, and a subset of HTML and LaTeX syntax. The original purpose of this software is to aid labeling charts.
 
+Take a look at [Textbox example and demos](https://observablehq.com/collection/@borgar/textbox) if you are curious what this library can do.
+
 #### Features:
 
 - Line-break text to fit dimensions.
