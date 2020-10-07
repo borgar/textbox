@@ -154,6 +154,17 @@ Render text or a "lines object" (see <a href="#linebreak">.linebreak()</a>) to e
 The lines render method is flexible when it comes to its arguments and their order. If provided either a `Canvas`, a `CanvasRenderingContext2D` it will render to the canvas, otherwise it will emit SVG built with the <a href="#createElement">.createElement()</a> interface.
 
 
+---
+
+
+<a name="measureText" href="#measureText">#</a> Textbox.**measureText**( _text_, _font_ )
+
+A utility function to measure the width of a string. Returns the width of the text in a number of pixels. This is the same utility that Textbox uses internally. The _font_ argument is expected to be a valid [CSS font shorthand value](https://developer.mozilla.org/en-US/docs/Web/CSS/font).
+
+```js
+Textbox.measureText("Lorem Ipsum", "bold 15px/20px sans-serif");
+```
+
 
 ## Limitations:
 
