@@ -1,7 +1,7 @@
 {
   "name": "@borgar/textbox",
   "description": "A utility to render formatted multi-line rich text.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "BSD-3-Clause",
   "main": "dist/textbox.js",
   "scripts": {
