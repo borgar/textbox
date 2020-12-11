@@ -1,7 +1,7 @@
 {
   "name": "@borgar/textbox",
   "description": "A utility to render formatted multi-line rich text.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "license": "BSD-3-Clause",
   "main": "dist/textbox.js",
   "scripts": {
@@ -29,9 +29,9 @@
     "@babel/plugin-proposal-export-default-from": "~7.10.4",
     "@babel/preset-env": "~7.11.5",
     "@babel/register": "~7.11.5",
-    "@borgar/eslint-config": "~1.1.0",
+    "@borgar/eslint-config": "~2.0.2",
     "babel-loader": "~8.1.0",
-    "eslint": "~6.7.2",
+    "eslint": "~7.14.0",
     "eslint-plugin-import": "~2.22.1",
     "regenerator-runtime": "~0.13.7",
     "tap-min": "~2.0.0",
