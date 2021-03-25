@@ -32,10 +32,10 @@ For any use, you will need to start by defining a new Textbox instance. You may 
 ```js
 const box = new Textbox({
   font: '12px/14px sans-serif',
-  width Infinity,
+  width: Infinity,
   height: Infinity,
-  align: 'left'
-  valign: 'top'
+  align: 'left',
+  valign: 'top',
   x: 0,
   overflow: 'ellipsis',
   parser: Textbox.defaultparser,
