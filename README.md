@@ -59,6 +59,19 @@ const box = new Textbox()
 
 Define what font to use. This will allow setting both font-size and line-height as well as font-family. Defaults to `12px/14px sans-serif`.
 
+You can pass a string in the [CSS Font Shorthand](https://developer.mozilla.org/en-US/docs/Web/CSS/font) or an object with the following properties:
+
+```json
+{
+    "family": "sans-serif",
+    "size": 12,
+    "height": 20,
+    "variant": "small-caps",
+    "style": "italic",
+    "baseline": 1,
+    "color": "blue"
+}
+```
 
 <a name="width" href="#width">#</a> .**width**( _width_in_px_ )
 
