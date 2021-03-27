@@ -1,6 +1,6 @@
 # Textbox
 
-Textbox is a simple library to layout text for display on SVG or Canvas. It can fairly decently line-break and render rich text given some boundaries. It understands simple text, and a subset of HTML and LaTeX syntax. The original purpose of this software is to aid labeling charts.
+Textbox is a simple library to layout multiline text for display on SVG or Canvas. It can fairly decently line-break and render rich text given some boundaries. It understands simple text, and a subset of HTML and LaTeX syntaxes. The original purpose of this software is to aid labeling charts.
 
 Take a look at [Textbox example and demos](https://observablehq.com/collection/@borgar/textbox) if you are curious what this library can do.
 
@@ -74,7 +74,7 @@ Controls the vertical dimension of the text. Defaults to `Infinity`. If the text
 
 <a name="x" href="#x">#</a> .**x**( _indent_in_px_ )
 
-Sets text horizontal indent. This is most useful for flowing text into  irregular shapes. A callback provided to this will be called every line with the line number as a parameter.
+Sets per-line text horizontal indent. This is most useful for flowing text into irregular shapes. A callback provided to this will be called every line with the line number as a parameter.
 
 
 <a name="align" href="#align">#</a> .**align**( _alignment_ )
