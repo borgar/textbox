@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<meta charset=utf-8 />
+<script src="nav.js"></script>
+<script src="/textbox.js"></script>
+
+<link rel="stylesheet" href="example.css" />
+
+<style>
+label {
+  display: inline-block;
+  margin-bottom: .7em;
+}
+label span {
+  display: block;
+  text-align: left;
+  margin-right: .5em;
+}
+
+
+/* svg styles */
+svg {
+  border : 1px solid #ccc;
+  background: #ddd;
+}
+rect {
+  fill: #fff;
+}
+
+</style>
+<body>
+<h1>Shrink text to fit</h1>
+<form onchange="update();">
+  <label>
+    <span>Height</span>
+    <input type="range" value="400" min="150" max="400" step="1"
+        oninput="update();" id="height" name="height">
+  </label>
+</form>
+
+<svg width="200" height="400">
+  <rect id="box" />
+  <g id="text"></g>
+</svg>
+
+<script>
+const lorem = `Lorem ipsum dolor sit amet,
+con­sect­etur adi­pisic­ing elit, sed do eius­mod
+tempor in­cidi­dunt ut labore et dolore magna
+aliqua. Ut enim ad minim veniam,
+quis nost­rud exer­cita­tion ullamco lab­oris
+nisi ut ali­quip ex ea commodo
+con­se­quat. Duis aute irure dolor in
+re­pre­hende­rit in volup­tate velit esse
+cillum dolore eu fugiat nulla pari­atur.
+Ex­cept­eur sint occa­ecat cupi­datat non
+proi­dent, sunt in culpa qui offi­cia
+dese­runt mollit anim id est laborum.`;
+
+const width = 200;
+const height = 400;
+
+const rect = document.querySelector('#box');
+const g = document.querySelector('#text');
+const slider = document.querySelector('#height');
+
+const box = new Textbox({
+  font: '16px/20px Helvetica, sans-serif',
+  width: width,
+  height: height,
+  align: 'left'
+});
+
+function update () {
+  const h = slider.valueAsNumber;
+
+  rect.setAttribute('height', h);
+  rect.setAttribute('width', width);
+  box.height(h);
+
+  let lines;
+  let fontSize = 18;
+  while (fontSize >= 8) {
+    box.font(`${fontSize}px/${fontSize * 1.4}px sans-serif`);
+    lines = box.linebreak(lorem);
+    if (!lines.hasOverflow) {
+      break;
+    }
+    // the smaller the number, the more precise (and slower) this will be
+    fontSize -= 0.5;
+  }
+
+  g.innerHTML = '';
+  g.appendChild(box.render(lines));
+}
+
+update();
+
+</script>
+
+<div id="about">
+<p>This example shows a method of fitting text to space by decreasing the font size. Essentially the text is reflowed into the box with gradually smaller font until the text fits.</p>
+
+<p>Doing this is not necessarily a great idea for high performant interactive visualizations, but this
+can work well for static renders, or small amounts of text.
+
+</p>
+</div>
+
+  </body>
+</html>

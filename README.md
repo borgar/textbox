@@ -145,6 +145,8 @@ lines.render( myCanvas );
 
 The lines render method is flexible when it comes to its arguments. It can accept a `Canvas`, a `CanvasRenderingContext2D`, or nothing in which case it will emit SVG. See <a href="#render">.render()</a>.
 
+The lines object also includes a `.hasOverflow` property which indicates if the text was able to fit a designated height. It will be true if the text did not fit the defined space.
+
 
 <a name="render" href="#render">#</a> .**render**( _text_ )  
 <a href="#render">#</a> .**render**( _text_, _Canvas_ )  
