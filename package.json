@@ -6,7 +6,7 @@
   "main": "dist/textbox.js",
   "scripts": {
     "build": "webpack-cli --mode=production",
-    "dev": "webpack-dev-server --mode=development",
+    "dev": "webpack serve --mode=development",
     "lint": "eslint lib/",
     "start": "nodemon -w lib/ -x \"tape -r @babel/register 'lib/**/*-test.js' 'lib/*-test.js'\" |tap-min",
     "test": "tape -r @babel/register 'lib/**/*-test.js' 'lib/*-test.js' |tap-min"
@@ -38,7 +38,7 @@
     "tape": "~5.2.2",
     "webpack": "~5.37.0",
     "webpack-cli": "~4.7.0",
-    "webpack-dev-server": "~3.11.2"
+    "webpack-dev-server": "~4.0.0-beta.3"
   },
   "dependencies": {}
 }
