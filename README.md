@@ -161,12 +161,21 @@ The lines render method is flexible when it comes to its arguments and their ord
 ---
 
 
-<a name="measureText" href="#measureText">#</a> Textbox.**measureText**( _text_, _font_ )
+<a name="measureText" href="#measureText">#</a> Textbox.**measureText**( _text_, _font_[, _options_ ])
 
 A utility function to measure the width of a string. Returns the width of the text in a number of pixels. This is the same utility that Textbox uses internally. The _font_ argument is expected to be a valid [CSS font shorthand value](https://developer.mozilla.org/en-US/docs/Web/CSS/font).
 
+Options is an object of options that work as follows:
+
+* `{ trim: true }`: Trim the text before measuring. True by default.
+* `{ collapse: true }`: Collapse whitespaces to single spaces (same as HTML does). True by default.
+
+
 ```js
-Textbox.measureText("Lorem Ipsum", "bold 15px/20px sans-serif");
+Textbox.measureText("Lorem Ipsum", "bold 15px/20px sans-serif", {
+  trim: false,
+  collapse: false,
+});
 ```
 
 
