@@ -1,7 +1,7 @@
 {
   "name": "@borgar/textbox",
   "description": "A utility to render formatted multi-line rich text.",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "license": "BSD-3-Clause",
   "main": "dist/textbox.js",
   "scripts": {
@@ -25,17 +25,17 @@
   ],
   "author": "Borgar <borgar@borgar.net>",
   "devDependencies": {
-    "@babel/core": "~7.18.9",
-    "@babel/plugin-proposal-export-default-from": "~7.18.9",
-    "@babel/preset-env": "~7.18.9",
+    "@babel/core": "~7.18.13",
+    "@babel/plugin-proposal-export-default-from": "~7.18.10",
+    "@babel/preset-env": "~7.18.10",
     "@borgar/eslint-config": "~2.2.1",
     "babel-loader": "~8.2.5",
-    "eslint": "~8.20.0",
+    "eslint": "~8.23.0",
     "eslint-plugin-import": "~2.26.0",
     "tap-min": "~2.0.0",
-    "tape": "~5.5.3",
+    "tape": "~5.6.0",
     "webpack": "~5.74.0",
     "webpack-cli": "~4.10.0",
-    "webpack-dev-server": "~4.9.3"
+    "webpack-dev-server": "~4.10.1"
   }
 }
