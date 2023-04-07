@@ -65,7 +65,7 @@ export type ElementFactory = (
   children?: string[] | string | Element[] | Element
 ) => Element;
 
-export class Textbox {
+export default class Textbox {
   constructor(options: TextboxOptions);
 
   /**
