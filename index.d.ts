@@ -133,7 +133,7 @@ export default class Textbox {
    *   `Textbox.defaultparser = Textbox.htmlparser;`
    */
   parser(): Parser;
-  parser(parser: Parser): this;
+  parser(parser: Parser | "html" | "text" | "latex"): this;
 
   createElement(fn: ElementFactory): this;
 
@@ -170,4 +170,5 @@ export interface Line extends Token {
 export interface Lines extends Array<Line> {
   height: number;
   width: number;
+  render: (options?: RenderOptions) => Element;
 }
