@@ -5,3 +5,4 @@ node_modules
 ~$*
 *.sw?
 yarn.lock
+.npmrc
