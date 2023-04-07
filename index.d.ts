@@ -33,7 +33,7 @@ export interface TextboxOptions {
   align?: CSS_TEXT_ALIGN | SVG_TEXT_ALIGN;
   valign?: VERTICAL_ALIGN;
   overflow?: OVERFLOW;
-  parser?: Parser;
+  parser?: Parser | "html" | "text" | "latex";
   createElement?: ElementFactory;
 }
 
