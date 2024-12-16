@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "build": "webpack-cli --mode=production",
+    "build": "tsup",
     "dev": "webpack serve --mode=development",
     "lint": "eslint lib/",
     "typecheck": "tsc --noEmit",
