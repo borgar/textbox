@@ -1,15 +1,26 @@
 {
   "name": "@borgar/textbox",
   "description": "A utility to render formatted multi-line rich text.",
-  "version": "1.7.0",
+  "version": "1.8.0-rc1",
   "license": "BSD-3-Clause",
-  "main": "dist/textbox.js",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "types": "dist/index.d.cts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.cts",
+      "default": "./lib/index.js"
+    }
+  },
   "scripts": {
-    "build": "webpack-cli --mode=production",
+    "build": "tsup",
     "dev": "webpack serve --mode=development",
     "lint": "eslint lib/",
-    "start": "nodemon -w lib/ -x \"tape 'lib/**/*-test.js' 'lib/*-test.js'\" |tap-min",
-    "test": "tape 'lib/**/*-test.js' 'lib/*-test.js' |tap-min"
+    "typecheck": "tsc --noEmit",
+    "start": "nodemon -w lib/ -x \"tape 'lib/**/*.spec.js' 'lib/*.spec.js'\" |tap-min",
+    "test": "tape 'lib/**/*.spec.js' 'lib/*.spec.js' |tap-min",
+    "all": "pnpm --silent lint & pnpm --silent typecheck & pnpm --silent test"
   },
   "repository": {
     "type": "git",
@@ -23,17 +34,34 @@
     "canvas",
     "svg"
   ],
+  "tsup": {
+    "entry": [
+      "lib/index.js"
+    ],
+    "target": "node16",
+    "format": [
+      "cjs"
+    ],
+    "sourcemap": true,
+    "clean": true,
+    "dts": true
+  },
   "author": "Borgar <borgar@borgar.net>",
   "devDependencies": {
     "@babel/core": "~7.21.3",
     "@babel/plugin-proposal-export-default-from": "~7.18.10",
     "@babel/preset-env": "~7.20.2",
-    "@borgar/eslint-config": "~3.0.0",
+    "@borgar/eslint-config": "^3.1",
+    "@stylistic/eslint-plugin": "~2.12.1",
+    "@types/tape": "~5.6.5",
     "babel-loader": "~9.1.2",
-    "eslint": "~8.36.0",
-    "eslint-plugin-import": "~2.27.5",
-    "tap-min": "~2.0.0",
+    "dprint": "~0.47.6",
+    "eslint": "^9.13.0",
+    "eslint-plugin-jsdoc": "~50.4.3",
+    "tap-min": "~3.0.0",
     "tape": "~5.6.3",
+    "tsup": "~8.3.5",
+    "typescript": "~5.7.2",
     "webpack": "~5.76.2",
     "webpack-cli": "~5.0.1",
     "webpack-dev-server": "~4.13.1"
