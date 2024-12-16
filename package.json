@@ -4,6 +4,7 @@
   "version": "1.8.0",
   "license": "BSD-3-Clause",
   "main": "dist/textbox.cjs",
+  "type": "module",
   "types": "dist/textbox.d.cts",
   "exports": {
     ".": {
@@ -18,7 +19,8 @@
     "lint": "eslint lib/",
     "typecheck": "tsc --noEmit",
     "start": "nodemon -w lib/ -x \"tape 'lib/**/*.spec.js' 'lib/*.spec.js'\" |tap-min",
-    "test": "tape 'lib/**/*.spec.js' 'lib/*.spec.js' |tap-min"
+    "test": "tape 'lib/**/*.spec.js' 'lib/*.spec.js' |tap-min",
+    "all": "pnpm --silent lint & pnpm --silent typecheck & pnpm --silent test"
   },
   "repository": {
     "type": "git",

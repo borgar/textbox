@@ -1,8 +1,4 @@
-/* eslint-disable */
-const path = require('path');
-const srcDir = path.resolve(__dirname, 'src');
-
-module.exports = {
+export default {
   entry: `./lib/index.js`,
   devtool: 'source-map',
   output: {
@@ -32,7 +28,7 @@ module.exports = {
     ]
   },
   devServer: {
-    static: path.join(__dirname, 'examples'),
+    static: 'examples',
     compress: true,
     port: 9000
   }
