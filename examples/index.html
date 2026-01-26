@@ -210,7 +210,7 @@ svg a {
 <script type="module">
 /* globals d3 */
 /* eslint-disable indent */
-import { Textbox, Rotator } from '@borgar/textbox';
+import { Textbox, Rotator, textparser, htmlparser, latexparser } from '@borgar/textbox';
 
 const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 const width = 300;
@@ -218,9 +218,9 @@ const height = 300;
 
 const texts = {};
 const extToParser = {
-  'txt': Textbox.textparser,
-  'html': Textbox.htmlparser,
-  'tex': Textbox.latexparser
+  'txt': textparser,
+  'html': htmlparser,
+  'tex': latexparser
 };
 
 const canvas = document.querySelector('canvas');
@@ -304,12 +304,11 @@ function update () {
   textbox.appendChild(rot.renderSVG(box.renderSVG(passage)));
 
   // draw a bounding frame
-  const anchor = rot.anchor();
   const frame = document.querySelector('#bbox');
   frame.setAttribute('width', w);
   frame.setAttribute('height', h);
-  frame.setAttribute('x', anchor[0]);
-  frame.setAttribute('y', anchor[1]);
+  frame.setAttribute('x', rot.origin[0]);
+  frame.setAttribute('y', rot.origin[1]);
   frame.setAttribute('transform', `rotate(${rot.rotate()})`);
 
   // render canvas

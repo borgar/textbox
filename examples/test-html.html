@@ -27,7 +27,7 @@ svg a {
 <h1>HTML syntax support</h1>
 <div id="output"></div>
 <script type="module">
-import { Textbox } from '@borgar/textbox';
+import { Textbox, htmlparser } from '@borgar/textbox';
 
 const margin = { top: 1, right: 1, bottom: 1, left: 1 };
 const width = 600;
@@ -36,7 +36,7 @@ const width = 600;
 const box = new Textbox({
   font: '14px/18px sans-serif',
   width: width,
-  parser: Textbox.htmlparser,
+  parser: htmlparser,
   createElement: React.createElement
 });
 

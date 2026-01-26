@@ -1,25 +1,29 @@
 import { createElement } from './createElement.ts';
-import type { LayoutOptions, RotatorOptions } from './types.ts';
+import type { CreateElementFunc, HAlignment, LayoutOptions, RotatorOptions, VAlignment } from './types.ts';
 
 const alignMap = {
-  top:    { vAnchor: -0.0 },
-  middle: { vAnchor: -0.5 },
-  bottom: { vAnchor: -1.0 },
-  left:   { hAnchor: -0.0 },
-  center: { hAnchor: -0.5 },
-  right:  { hAnchor: -1.0 }
+  top:    -0.0,
+  middle: -0.5,
+  bottom: -1.0,
+  left:   -0.0,
+  center: -0.5,
+  right:  -1.0
 };
 
+/**
+ * A convenience utility class to assist rotating text.
+ */
 export class Rotator {
   static createElement = createElement;
 
+  /** @internal */
   props: {
     width: number;
     height: number;
     rotation: number;
-    vAnchor: number;
-    hAnchor: number;
-    createElement: typeof createElement,
+    align: HAlignment;
+    valign: VAlignment;
+    createElement: CreateElementFunc,
   };
 
   constructor (opts: RotatorOptions) {
@@ -27,8 +31,8 @@ export class Rotator {
       width: Infinity,
       height: Infinity,
       rotation: 0,
-      vAnchor: 0,
-      hAnchor: 0,
+      align: 'left',
+      valign: 'top',
       createElement: Rotator.createElement
     };
     if (opts) {
@@ -41,52 +45,125 @@ export class Rotator {
     this.render = this.render.bind(this);
   }
 
-  anchor (): [number, number];
-  anchor (v: string): this;
-  anchor (v?: string): [ number, number ] | this {
-    const { hAnchor, vAnchor, width, height } = this.props;
+  /**
+   * Origin point of the rotation
+   */
+  get origin (): [ number, number ] {
+    const { align, valign, width, height } = this.props;
+    return [ alignMap[align] * width, alignMap[valign] * height ];
+  }
+
+  /**
+   * A convenience method to set or get a rotation anchor.
+   *
+   * A rotation anchor controls the origin point of the rotation relative to textbox.
+   * It is a string of one or more of alignment keywords separated by spaces.
+   *
+   * Keywords: [ `top`, `middle`, `bottom`, `left`, `center`, `right` ].
+   *
+   * By default it is set to `"top left"`
+   */
+  anchor (): string;
+  anchor (anchor: string): this;
+  anchor (anchor?: string): string | this {
     if (!arguments.length) {
-      return [ hAnchor * width, vAnchor * height ];
+      return `${this.props.align} ${this.props.valign}`;
     }
-    if (typeof v === 'string') {
-      v.toLowerCase()
-        .trim()
-        .split(/\s+/)
-        .forEach(d => Object.assign(this.props, alignMap[d]));
+    if (typeof anchor === 'string') {
+      const dir = anchor.toLowerCase().trim().split(/[\s,;]+/);
+      for (const d of dir) {
+        if (d === 'top' || d === 'middle' || d === 'bottom') {
+          this.valign(d);
+        }
+        if (d === 'left' || d === 'center' || d === 'right') {
+          this.align(d);
+        }
+      }
     }
     return this;
   }
 
+  /**
+   * Controls the vertical anchor point of the rotation.
+   *
+   * By default this will be set to `"top"`.
+   */
+  valign (): VAlignment;
+  valign (align: VAlignment): this;
+  valign (align?: VAlignment): this | VAlignment {
+    if (!arguments.length) {
+      return this.props.valign;
+    }
+    this.props.valign = align ?? 'top';
+    return this;
+  }
+
+  /**
+   * Controls the horizontal alignment of the text.
+   *
+   * By default this will be set to `"left"`.
+   */
+  align (): HAlignment;
+  align (align: HAlignment): this;
+  align (align?: HAlignment): this | HAlignment {
+    if (!arguments.length) {
+      return this.props.align;
+    }
+    this.props.align = align ?? 'left';
+    return this;
+  }
+
+  /**
+   * Controls the width of the rotation box in pixels.
+   *
+   * By default this will be set to `Infinity`.
+   */
   width (): number;
-  width (v: number): this;
-  width (v?: number): this | number {
+  width (width: number): this;
+  width (width?: number): this | number {
     if (!arguments.length) {
       return this.props.width;
     }
-    this.props.width = v ?? Infinity;
+    this.props.width = width ?? Infinity;
     return this;
   }
 
+  /**
+   * Controls the height of the rotation box in pixels.
+   *
+   * By default this will be set to `Infinity`.
+   */
   height (): number;
-  height (v: number): this;
-  height (v?: number): this | number {
+  height (height: number): this;
+  height (height?: number): this | number {
     if (!arguments.length) {
       return this.props.height;
     }
-    this.props.height = v ?? Infinity;
+    this.props.height = height ?? Infinity;
     return this;
   }
 
+  /**
+   * Controls the angle of rotation in degrees.
+   *
+   * By default this will be set to `0`.
+   */
   rotate (): number;
-  rotate (v: number): this;
-  rotate (v?: number): this | number {
+  rotate (degrees: number): this;
+  rotate (degrees?: number): this | number {
     if (!arguments.length) {
       return this.props.rotation;
     }
-    this.props.rotation = v ?? 0;
+    this.props.rotation = degrees ?? 0;
     return this;
   }
 
+  /**
+   * The element factory function to use when constructing SVG elements within the SVG renderer.
+   *
+   * The interface conforms to React's `React.createElement` so you may simply set that function as
+   * the factory if you want to use the rendered text in a React render tree.
+   */
   createElement (): LayoutOptions['createElement'];
   createElement (factory: LayoutOptions['createElement']): this;
   createElement (factory?: LayoutOptions['createElement']): this | LayoutOptions['createElement'] {
@@ -97,6 +174,12 @@ export class Rotator {
     return this;
   }
 
+  /**
+   * Set up a rotated context for additional rendering.
+   *
+   * The method will set up a rotated context, call the supplied callback argument
+   * with a CanvasRenderingContext2D as its argument, and then clean up.
+   */
   renderCanvas (
     callback: (ctx: CanvasRenderingContext2D) => void,
     target: OffscreenCanvas | HTMLCanvasElement | CanvasRenderingContext2D
@@ -105,18 +188,28 @@ export class Rotator {
     if (ctx instanceof CanvasRenderingContext2D) {
       ctx.save();
       ctx.rotate(this.rotate() * Math.PI / 180);
-      ctx.translate(...this.anchor());
+      ctx.translate(...this.origin);
       callback(ctx);
       ctx.restore();
     }
   }
 
+  /**
+   * Render an SVG <g> element that is rotated around its origin point and
+   * place the given content inside it.
+   */
   renderSVG (content: SVGElement) {
     return this.props.createElement('g', {
-      transform: `rotate(${this.rotate()}) translate(${this.anchor().join(',')})`
+      transform: `rotate(${this.rotate()}) translate(${this.origin.join(',')})`
     }, content);
   }
 
+  /**
+   * Render onto a Canvas or as an SVG element based on whether a canvas based
+   * target was supplied or not.
+   *
+   * @deprecated
+   */
   render (contentOrCallback: SVGElement): SVGElement;
   render (contentOrCallback: () => void, ctx: OffscreenCanvas | HTMLCanvasElement | CanvasRenderingContext2D): void;
   render (

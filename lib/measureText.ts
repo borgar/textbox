@@ -3,7 +3,7 @@ import { WHITESPACE } from './constants.ts';
 import { fontStringParser } from './fontStringParser.ts';
 import { fontToString } from './fontToString.ts';
 import type { Token } from './parser/tokens.ts';
-import type { CanvasPartial, FontProps, MeasureOptions } from './types.ts';
+import type { MinimalCanvas, FontProps, MeasureOptions } from './types.ts';
 
 const defaultFont = fontStringParser('12px/14px sans-serif');
 
@@ -36,7 +36,7 @@ export function getDumbHandler (): MeasureFn {
   };
 }
 
-function getMeasureFromCanvas (canvas?: CanvasPartial | null): MeasureFn | void {
+function getMeasureFromCanvas (canvas?: MinimalCanvas | null): MeasureFn | void {
   if (canvas && canvas.getContext) {
     const context = canvas.getContext('2d');
     if (context && typeof context.measureText === 'function') {
@@ -58,7 +58,12 @@ export function getBrowserCanvas () {
 }
 
 let measure: MeasureFn = getMeasureFromCanvas(getBrowserCanvas()) || getDumbHandler();
-export function setMeasureCanvas (canvas: CanvasPartial | null) {
+/**
+ * Set the canvas to use when measuring text. This will be needed when using {@link measureText}
+ * in a non-browser environment.
+ * @param canvas The canvas interface to use.
+ */
+export function setMeasureCanvas (canvas: MinimalCanvas | null) {
   if (canvas == null) {
     measure = getMeasureFromCanvas(getBrowserCanvas()) || getDumbHandler();
   }
@@ -71,8 +76,15 @@ export function setMeasureCanvas (canvas: CanvasPartial | null) {
 }
 
 /**
- * Measure a string of text as printed with a specified font and return
- * its width.
+ * Measure a string of text as printed with a specified font and return its width.
+ *
+ * Be careful that in non-browser environments you may want to supply an alternative
+ * canvas using {@link setMeasureCanvas} or this method will default to a crude
+ * "best guess" method.
+ *
+ * @param token A string or token of text to measure.
+ * @param font A CSS font shorthand string or a collection of font properties.
+ * @param options Text handling options.
  */
 export function measureText (
   token: string | Token,

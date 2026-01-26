@@ -102,9 +102,12 @@ function parseAttr (s: string): Record<string, string> {
 }
 
 /**
- * Parse simple HTML
- */
-export function htmlparser (text: string | null | undefined): Token[] {
+* Parse a very small subset of HTML.
+*
+* This parser can handle linebreaks, as well as inline text
+* instruction tags such as `<b>`, `<tt>`, `<em>`, `<sup>`.
+*/
+export function htmlparser (text?: string | null): Token[] {
   text = String(text || '').trim();
 
   let m: RegExpExecArray | null;

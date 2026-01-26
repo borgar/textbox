@@ -1,5 +1,8 @@
 import type { FontProps } from '../types.ts';
 
+/**
+ * Represents a unit of text, typically a single word.
+ */
 export class Token {
   value: string;
   width: number;
@@ -13,18 +16,12 @@ export class Token {
     this.width = 0;
   }
 
-  clone () {
-    const t = new Token(this.value);
-    t.width = this.width ?? 0;
-    t.whitespace = this.whitespace;
-    t.font = this.font;
-    return t;
-  }
-
+  /** @internal */
   valueOf () {
     return this.value;
   }
 
+  /** @internal */
   toString () {
     return this.value;
   }

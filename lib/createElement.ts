@@ -29,7 +29,7 @@ function append (parent: SVGElement, child: string | SVGElement | SVGElement[]):
 export function createElement (
   name: string,
   props?: Record<string, string | number | null | boolean> | null,
-  ...children: (SVGElement | string | undefined)[]
+  ...children: (SVGElement | string | undefined | null)[]
 ): SVGElement {
   if (typeof document === 'undefined') {
     throw new Error('No document found, cannot create elements');

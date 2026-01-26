@@ -9,14 +9,14 @@
 syntax support</h1>
 <div id="output" style="outline: 1px dotted silver;"></div>
 <script type="module">
-import { Textbox } from '@borgar/textbox';
+import { Textbox, latexparser } from '@borgar/textbox';
 
 const width = 600;
 
 const box = new Textbox({
   font: '14px/18px sans-serif',
   width: width,
-  parser: Textbox.latexparser
+  parser: latexparser
 });
 
 fetch('./text/latex-example.tex')

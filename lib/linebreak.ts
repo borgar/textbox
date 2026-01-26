@@ -70,6 +70,14 @@ function getEmptyLines (f_base: FontProps): Lines {
   });
 }
 
+function cloneToken (src: Token): Token {
+  const t = new Token(src.value);
+  t.width = src.width ?? 0;
+  t.whitespace = src.whitespace;
+  t.font = src.font;
+  return t;
+}
+
 type BreakPoint = {
   index: number;
   width: number;
@@ -157,7 +165,7 @@ export function linebreak (tokens: Token[], opts: LayoutOptions): Lines {
         const lw = width(line_index);
         if ((line_width + token.width) > lw) {
           // split the token into two halves
-          const post = token.clone();
+          const post = cloneToken(token);
           // reduce the token to fit the line
           do {
             token.value = token.value.slice(0, -1);

@@ -19,7 +19,7 @@ svg, canvas {
 <label><input type="radio" name="align" checked value="justify" /> Justify</label>
 </form>
 <script type="module">
-import { Textbox } from '@borgar/textbox';
+import { Textbox, htmlparser } from '@borgar/textbox';
 
 const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 let text = '';
@@ -39,7 +39,7 @@ function render () {
     font: `${fontSize}px/${lineHeight}px sans-serif`,
     align: align,
     width: width,
-    parser: Textbox.htmlparser
+    parser: htmlparser
   });
   const lines = box.linebreak(text);
 

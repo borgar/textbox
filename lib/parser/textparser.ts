@@ -14,7 +14,12 @@ const isCJKCommon = (char: string): boolean => {
   return code >= 0x4E00 && code <= 0x9FFF;
 };
 
-export function textparser (text: string): Token[] {
+/**
+ * A basic text parser that sections texts into words but also
+ * deals with inserting appropriate breaks at correct points.
+ */
+export function textparser (text?: string | null): Token[] {
+  text = text || '';
   const tokens: Token[] = [];
   let last_ch = text.charAt(0);
   let curr_ch: string = '';

@@ -94,9 +94,12 @@ commands.textit = commands.it;
 commands.textcolor = commands.color;
 
 /**
- * Parse a very small subset of LaTeX
+ * Parse a very small subset of LaTeX.
+ *
+ * This parser can handle linebreaks, verbatim, as well as inline text
+ * instructions for non-math text. Math mode is not supported at all.
  */
-export function latexparser (text: string): Token[] {
+export function latexparser (text?: string | null): Token[] {
   text = String(text || '').trim();
 
   // quickly preprocess some "non-consistent" character escapes

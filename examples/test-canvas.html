@@ -7,7 +7,7 @@
 <h1>Rendering to a canvas</h1>
 <canvas style="border: 1px solid #888"></canvas>
 <script type="module">
-import { Textbox } from '@borgar/textbox';
+import { Textbox, htmlparser } from '@borgar/textbox';
 
 const canvas = document.querySelector('canvas');
 const dpr = window.devicePixelRatio || 1;
@@ -34,7 +34,7 @@ ctx.restore();
 const box = new Textbox({
   width: width,
   height: height,
-  parser: Textbox.htmlparser,
+  parser: htmlparser,
   font: '16px/22px Tahoma, sans-serif'
 });
 
