@@ -1,5 +1,5 @@
 {
-  "include": ["lib/**/*"],
+  "include": ["src/**/*"],
   "compilerOptions": {
      "allowImportingTsExtensions": true,
      "allowJs": true,
@@ -17,7 +17,7 @@
      "noErrorTruncation": true,
      "noImplicitAny": false,
      "outDir": "types",
-     "rootDir": "lib",
+     "rootDir": "src",
      "skipLibCheck": true,
      "strict": true,
      "stripInternal": true,

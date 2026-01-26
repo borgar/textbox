@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { htmlparser as parse } from './htmlparser.ts';
 
