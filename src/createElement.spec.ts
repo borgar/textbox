@@ -1,13 +1,14 @@
-/* globals global */
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createElement } from './createElement.ts';
 
 const addProp = (o: object, p: string, v: unknown) => {
   Object.defineProperty(o, p, { value: v, writable: false, enumerable: false });
 };
 
+let orgDoc: typeof globalThis.document;
 beforeAll(() => {
-  global.document = {
+  orgDoc = globalThis.document;
+  globalThis.document = {
     createElementNS: function (ns: string, tagName: string) {
       const node: any = {
         nodeName: tagName.toUpperCase()
@@ -32,6 +33,9 @@ beforeAll(() => {
       return String(text);
     }
   };
+});
+afterAll(() => {
+  globalThis.document = orgDoc;
 });
 
 describe('createElement', () => {

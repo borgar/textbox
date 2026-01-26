@@ -22,6 +22,12 @@
     "check": "npm run test && npm run lint && npm run typecheck",
     "release": "git diff --exit-code && tsup && npm publish && V=$(jq -r .version package.json) && git tag -a $V -m $V && git push origin $V && gh release create $V --generate-notes"
   },
+  "files": [
+    "docs/*.md",
+    "dist",
+    "README.md",
+    "LICENCE"
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:borgar/textbox.git"
