@@ -1,7 +1,7 @@
 {
   "name": "@borgar/textbox",
   "description": "A utility to render formatted multi-line rich text.",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "license": "BSD-3-Clause",
   "main": "dist/index.cjs",
   "type": "module",
