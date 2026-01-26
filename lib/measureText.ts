@@ -1,38 +1,34 @@
 /* globals document OffscreenCanvas HTMLCanvasElement */
-import { whitespace } from './whitespace.js';
-import { Font } from './Font.js';
+import { WHITESPACE } from './constants.ts';
+import { fontStringParser } from './fontStringParser.ts';
+import { fontToString } from './fontToString.ts';
+import type { Token } from './parser/tokens.ts';
+import type { CanvasPartial, FontProps, MeasureOptions } from './types.ts';
 
-const defaultFont = new Font();
+const defaultFont = fontStringParser('12px/14px sans-serif');
+
 const defaultOptions = {
   trim: true,
   collapse: true
 };
+
 const wCache = {};
 
-/**
- * @typedef {(text: string, font: string | Font) => number} MeasureFn
- *
- * @typedef CanvasContext
- * @prop {string} font
- * @prop {(text: string) => { width: number }} measureText
- *
- * @typedef CanvasPartial
- * @prop {(contextId: '2d') => CanvasContext | null} getContext
- */
+type MeasureFn = (text: string, font: string | FontProps) => number;
 
 // This is just guesswork but works surprisingly well.
 // Intended to be used to renderer for tests, or as a last
 // resort in a server env.
-export function getDumbHandler () {
-  return (text, font) => {
-    const f = new Font(font);
-    let size = f.size;
-    if (/\bmonospace\b/.test(f.family)) {
+export function getDumbHandler (): MeasureFn {
+  return (text: string, font: string | FontProps) => {
+    const f = typeof font === 'string' ? fontStringParser(font) : font;
+    let size = f.size ?? 12;
+    if (f.family && /\bmonospace\b/.test(f.family)) {
       size *= 0.6;
     }
     else {
       size *= 0.45;
-      if (f.weight > 400) {
+      if (f.weight && f.weight > 400) {
         size *= 1.18;
       }
     }
@@ -40,7 +36,7 @@ export function getDumbHandler () {
   };
 }
 
-function getMeasureFromCanvas (canvas) {
+function getMeasureFromCanvas (canvas?: CanvasPartial | null): MeasureFn | void {
   if (canvas && canvas.getContext) {
     const context = canvas.getContext('2d');
     if (context && typeof context.measureText === 'function') {
@@ -61,13 +57,8 @@ export function getBrowserCanvas () {
   );
 }
 
-/** @type {MeasureFn} */
-let measure = getMeasureFromCanvas(getBrowserCanvas()) || getDumbHandler();
-
-/**
- * @param {CanvasPartial | null} canvas
- */
-export function setMeasureCanvas (canvas) {
+let measure: MeasureFn = getMeasureFromCanvas(getBrowserCanvas()) || getDumbHandler();
+export function setMeasureCanvas (canvas: CanvasPartial | null) {
   if (canvas == null) {
     measure = getMeasureFromCanvas(getBrowserCanvas()) || getDumbHandler();
   }
@@ -82,22 +73,19 @@ export function setMeasureCanvas (canvas) {
 /**
  * Measure a string of text as printed with a specified font and return
  * its width.
- *
- * @param {string | import('./parser/tokens.js').Token} token
- * @param {(Font | string)} font
- * @param {import('./types.js').MeasureOptions} [options]
- * @return {number}
  */
-export function measureText (token, font, options = defaultOptions) {
+export function measureText (
+  token: string | Token,
+  font: string | FontProps,
+  options: MeasureOptions = defaultOptions
+): number {
   if (typeof font === 'string') {
-    font = new Font(font);
-  }
-  else if (!(font instanceof Font)) {
-    font = new Font().assign(font);
+    font = fontStringParser(font);
   }
   else {
-    font = defaultFont.assign(font);
+    font = { ...defaultFont, ...font };
   }
+
   const opts = Object.assign({}, defaultOptions, options);
   let s = String(token);
   // empty
@@ -105,10 +93,10 @@ export function measureText (token, font, options = defaultOptions) {
     return 0;
   }
   // whitespace
-  if (s in whitespace) {
-    const cacheId = font.valueOf() + '/' + s;
+  if (s in WHITESPACE) {
+    const cacheId = fontToString(font, true) + '/' + s;
     if (!(cacheId in wCache)) {
-      wCache[cacheId] = measure(`_${s}_`, font) - measure('__', font);
+      wCache[cacheId] = measure(`_${s}_`, fontToString(font)) - measure('__', fontToString(font));
     }
     return wCache[cacheId];
   }
@@ -124,7 +112,6 @@ export function measureText (token, font, options = defaultOptions) {
   else if (opts.collapse) {
     s = s.replace(/\s+/g, ' ');
   }
-  const tracking = typeof token === 'string' ? 0 : token.tracking || 0;
-  return measure(s, font) + font.size * tracking;
+  const tracking = typeof token === 'string' ? 0 : token.font.tracking || 0;
+  return measure(s, fontToString(font)) + (font.size ?? 12) * tracking;
 }
-

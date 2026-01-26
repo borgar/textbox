@@ -1,6 +1,9 @@
-import { Token, LineBreak } from './tokens.js';
-import { textparser } from './textparser.js';
-import { latexentities } from './latexentities.js';
+import { Token, LineBreak } from './tokens.ts';
+import { textparser } from './textparser.ts';
+import { LATEX_ENTITIES } from './latexentities.ts';
+import type { FontProps } from '../types.ts';
+import { ParserContext } from './ParserContext.ts';
+import { BASELINE_SUB, BASELINE_SUPER, SUBSCRIPT_SIZE } from './constants.ts';
 
 const re_command = /^(\^|_|\\[^#$%&~_^\\{}()\s]+)(\{)?/;
 const re_comment = /^%[^\n]+(?:\n|$)/;
@@ -42,28 +45,45 @@ const preprocess = {
   '\\@': '\uFEFF', // (0 width NBSp) end sentence
   '\\\\': '\\newline{}' // newline command shorthand
 };
-// FIXME: \emph https://www.sharelatex.com/learn/Bold,_italics_and_underlining#Emphasising_text
-const commands = {
-  'bf': p => (p.weight = 'bold'),
+
+type CommandHandler = (this: ParserContext, p: FontProps, ...args: string[]) => any;
+
+const commands: Record<string, CommandHandler> = {
+  'bf': p => (p.weight = 700),
+  'emph': p => {
+    if (p.style === 'italic') {
+      p.style = 'normal';
+    }
+    else {
+      p.style = 'italic';
+    }
+  },
   'it': p => (p.style = 'italic'),
   'sl': p => (p.style = 'italic'),
   'color': (p, c) => (p.color = c),
   'href': (p, c) => (p.href = c),
-  '^': p => (p.sup = true),
-  '_': p => (p.sub = true),
-  'par': function (p) {
+  '^': p => {
+    p.baseline = BASELINE_SUPER;
+    p.sizeAdjust = SUBSCRIPT_SIZE;
+  },
+  '_': p => {
+    p.baseline = BASELINE_SUB;
+    p.sizeAdjust = SUBSCRIPT_SIZE;
+  },
+  'par': function () {
     this.tokens.push(new LineBreak(), new LineBreak());
   },
-  'newline': function (p) {
+  'newline': function () {
     this.tokens.push(new LineBreak());
   },
   'url': function (p, url) {
-    p = this.open_context();
-    p.href = url;
+    this.open_context();
+    this.props.href = url;
     this.add_token(new Token(url));
     this.close_context();
   }
 };
+
 commands.textsuperscript = commands['^'];
 commands.textsubscript = commands._;
 commands.textsl = commands.sl;
@@ -75,139 +95,95 @@ commands.textcolor = commands.color;
 
 /**
  * Parse a very small subset of LaTeX
- *
- * @param {string} text
- * @return {Token[]}
  */
-export function latexparser (text) {
+export function latexparser (text: string): Token[] {
   text = String(text || '').trim();
 
   // quickly preprocess some "non-consistent" character escapes
-  const verb = [ 0 ];
+  const verb = [ '' ];
   text = text
     // verbatim texts pulled out
-    .replace(/\\verb,(.*?),/, (m, t) => {
+    .replace(/\\verb,(.*?),/, (_, t: string) => {
       verb.push(t);
       return '\\verb,' + (verb.length - 1) + ',';
     })
     .replace(/\\\\\n/g, () => '\\\\')
-    .replace(re_preprocess, (a, idx, str) => {
-      return (str.charAt(idx - 1) === '\\') ? a : preprocess[a];
-    })
-    .replace(/\n\s+/g, a => {
-      if (/\n/.test(a.slice(1))) { return '\\par '; }
-      return a;
-    })
-    .replace(/\\symbol\{(\d+)\}/, (a, b, idx, str) => {
-      return (str.charAt(idx - 1) === '\\') ? a : String.fromCharCode(1 * b);
-    })
-    // Note: x^10 is not the same as x^{10}.
-    // The former produces $x^{1}0$ instead of $x^{10}$.
-    .replace(/(^|[^\\])(\^|_)(\d|[^{]\S*)/g, (a, b, c, d) => {
-      return b + c + '{' + d + '}';
-    })
+    .replace(re_preprocess, (a, idx, str) => ((str.charAt(idx - 1) === '\\') ? a : preprocess[a]))
+    .replace(/\n\s+/g, a => (a.slice(1).includes('\n') ? '\\par ' : a))
+    .replace(/\\symbol\{(\d+)\}/, (a, b, idx, str) => ((str.charAt(idx - 1) === '\\') ? a : String.fromCharCode(1 * b)))
+    // Note: x^10 is not the same as x^{10}: The former produces $x^{1}0$ instead of $x^{10}$.
+    .replace(/(^|[^\\])(\^|_)(\d|[^{]\S*)/g, (a, b, c, d) => b + c + '{' + d + '}')
     // verbatim texts inserted back
-    .replace(/\\verb,(.*?),/, (m, n) => {
-      return `\\verb,${verb[+n]},`;
-    });
+    .replace(/\\verb,(.*?),/, (m, n) => `\\verb,${verb[+n]},`);
 
-  let prop = {
-    weight: null,
-    italic: null,
-    variant: null,
-    sub: false,
-    sup: false,
-    href: null
-  };
+  const self = new ParserContext();
 
-  const tokens = [];
-  const stack = [];
-  let m;
-  const add_token = function (d) {
-    for (const p in prop) {
-      if (prop[p]) {
-        d[p] = prop[p];
-      }
-    }
-    tokens.push(d);
-    return d;
-  };
-  const open_context = function () {
-    // create new context
-    stack.push(prop);
-    prop = Object.create(prop);
-  };
-  const close_context = function () {
-    // restore context
-    if (!stack.length) {
-      throw new Error('Unexpected }');
-    }
-    prop = stack.pop();
-  };
-  const self = {
-    tokens: tokens,
-    open_context: open_context,
-    close_context: close_context,
-    add_token: add_token
-  };
-
+  let m: RegExpExecArray | null;
   while (text.length) {
     if ((m = re_plaintext.exec(text))) {
       // delegate text handling to the simple parser
-      textparser(m[0], false).forEach(add_token);
+      textparser(m[0]).forEach(d => self.add_token(d));
     }
     else if ((m = re_esc.exec(text))) {
-      add_token(new Token(m[1]));
+      self.add_token(new Token(m[1]));
     }
     else if ((m = re_comment.exec(text))) {
       // noop
     }
     else if ((m = /^\{/.exec(text))) {
       // create new context
-      open_context();
+      self.open_context();
     }
     else if ((m = /^\}/.exec(text))) {
-      close_context();
+      self.close_context();
     }
     else if ((m = /^\$/.exec(text))) {
       // toggle math mode -- not supported
     }
     else if ((m = /^\\verb,([^,]+),/.exec(text))) {
-      add_token(new Token(m[1]));
+      self.add_token(new Token(m[1]));
     }
     else if ((m = re_command.exec(text))) {
       const cmd = m[1].slice(1) || m[1];
       let ctx = !!m[2];
       if (/^(La)?TeX$/i.test(cmd)) {
-        open_context();
-        prop.family = 'serif';
-        let lt;
+        self.open_context();
+        self.props.family = 'serif';
+        let lt: Token;
         if (cmd === 'LaTeX') {
-          lt = add_token(new Token('L'));
-          lt.tracking = -0.25;
-          lt = add_token(new Token('A'));
-          lt.size = 0.7;
-          lt.baseline = 0.3;
-          lt.tracking = -0.1;
+          lt = self.add_token(new Token('L'));
+          lt.font = Object.create(lt.font);
+          lt.font.tracking = -0.25;
+
+          lt = self.add_token(new Token('A'));
+          lt.font = Object.create(lt.font);
+          lt.font.sizeAdjust = 0.7;
+          lt.font.baseline = 0.3;
+          lt.font.tracking = -0.1;
         }
-        lt = add_token(new Token('T'));
-        lt.tracking = -0.17;
-        lt = add_token(new Token('E'));
-        lt.baseline = -0.22;
-        lt.tracking = -0.13;
-        lt = add_token(new Token('X'));
-        close_context();
+
+        lt = self.add_token(new Token('T'));
+        lt.font = Object.create(lt.font);
+        lt.font.tracking = -0.17;
+
+        lt = self.add_token(new Token('E'));
+        lt.font = Object.create(lt.font);
+        lt.font.baseline = -0.22;
+        lt.font.tracking = -0.13;
+
+        lt = self.add_token(new Token('X'));
+        self.close_context();
       }
-      else if (cmd in latexentities) {
-        add_token(new Token(latexentities[cmd]));
+      else if (cmd in LATEX_ENTITIES) {
+        self.add_token(new Token(LATEX_ENTITIES[cmd]));
         if (ctx) {
-          open_context();
+          self.open_context();
         }
       }
       else if (cmd in commands) {
-        const args = [];
-        let narg = commands[cmd].length - 1;
-        let arg;
+        const args: string[] = [];
+        let narg = Math.max(0, commands[cmd].length - 1);
+        let arg: RegExpExecArray | null;
         if (narg) {
           // ignore matched context
           ctx = false;
@@ -224,20 +200,24 @@ export function latexparser (text) {
           m[0] = /^\{/.exec(text) ? '{' : '';
           ctx = !!m[0];
         }
-        if (ctx) { open_context(); }
-        commands[cmd].apply(self, [ prop, ...args ]);
+        if (ctx) {
+          self.open_context();
+        }
+        commands[cmd].apply(self, [ self.props, ...args ]);
       }
       else {
-        add_token(new Token(m[1]));
-        if (ctx) { open_context(); }
+        self.add_token(new Token(m[1]));
+        if (ctx) {
+          self.open_context();
+        }
       }
     }
     else {
-      m = [ text.slice(0, 1) ];
-      add_token(new Token(m[0]));
+      m = [ text.slice(0, 1) ] as RegExpExecArray;
+      self.add_token(new Token(m[0]));
     }
     text = text.slice(m[0].length);
   }
 
-  return tokens;
+  return self.tokens;
 }

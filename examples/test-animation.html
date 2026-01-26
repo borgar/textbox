@@ -3,7 +3,7 @@
 <body>
 <script src="nav.js"></script>
 <link rel="stylesheet" href="example.css" />
-<script src="textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 <style>
 rect {
   fill: #eee;
@@ -16,7 +16,9 @@ rect {
   <rect id="box" />
   <g id="text"></g>
 </svg>
-<script>
+<script type="module">
+import { Textbox } from '@borgar/textbox';
+
 const lorem = `Lorem ipsum dolor sit amet,
 con­sect­etur adi­pisic­ing elit, sed do eius­mod
 tempor in­cidi­dunt ut labore et dolore magna

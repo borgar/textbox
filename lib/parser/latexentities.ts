@@ -1,4 +1,4 @@
-export const latexentities = {
+export const LATEX_ENTITIES = {
   copyright: '©',
   textcopyright: '©',
   dag: '†',

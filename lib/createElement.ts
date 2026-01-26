@@ -1,8 +1,10 @@
 /* globals document SVGElement */
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
 const hasOwnProp = Object.prototype.hasOwnProperty;
 
 const _mem = {};
-function unCamel (name) {
+function unCamel (name: string): string {
   if (!_mem[name]) {
     _mem[name] = name.replace(/([a-z])([A-Z])/g, (_, a, b) => {
       return a + '-' + b.toLowerCase();
@@ -11,23 +13,24 @@ function unCamel (name) {
   return _mem[name];
 }
 
-function append (parent, child) {
+function append (parent: SVGElement, child: string | SVGElement | SVGElement[]): void {
   if (Array.isArray(child)) {
-    return child.forEach(c => append(parent, c));
+    child.forEach(c => append(parent, c));
   }
-  if (typeof child === 'string') {
-    child = document.createTextNode(child);
+  else if (typeof child === 'string') {
+    const ch = document.createTextNode(child);
+    parent.appendChild(ch);
   }
-  parent.appendChild(child);
+  else {
+    parent.appendChild(child);
+  }
 }
 
-/**
- * @param {string} name
- * @param {Record<string, string> | null} [props]
- * @param {(SVGElement | undefined)[]} children
- * @return {SVGElement}
- */
-export function createElement (name, props, ...children) {
+export function createElement (
+  name: string,
+  props?: Record<string, string | number | null | boolean> | null,
+  ...children: (SVGElement | string | undefined)[]
+): SVGElement {
   if (typeof document === 'undefined') {
     throw new Error('No document found, cannot create elements');
   }
@@ -49,7 +52,9 @@ export function createElement (name, props, ...children) {
   }
   if (children != null && children.length) {
     children.forEach(child => {
-      append(elm, child);
+      if (child) {
+        append(elm, child);
+      }
     });
   }
   return elm;

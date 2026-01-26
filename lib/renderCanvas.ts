@@ -1,4 +1,7 @@
-import { LineBreak } from './parser/tokens.js';
+import { fontStringParser } from './fontStringParser.ts';
+import { fontToString } from './fontToString.ts';
+import { LineBreak } from './parser/tokens.ts';
+import type { FontProps, LayoutOptions, Lines, VAlignment } from './types.ts';
 
 const valignMult = {
   middle: 0.5,
@@ -7,25 +10,28 @@ const valignMult = {
   end: 1
 };
 
-function getColor (font, token) {
-  if (font.color) { return font.color; }
-  return (token.href ? '#00C' : '#000');
+function getColor (font: FontProps) {
+  return font.color || (font.href ? '#00C' : '#000');
 }
 
-export function renderCanvas (lines, opt, ctx) {
-  if (!lines.length) { return; }
+export function renderCanvas (lines: Lines, opt: LayoutOptions, ctx: CanvasRenderingContext2D) {
+  if (!lines.length) {
+    return;
+  }
 
   ctx.textBaseline = 'middle';
 
-  const _font = opt.font();
-  const lh = _font.height;
-  const fs = _font.size;
+  const _font = fontStringParser(opt.font);
+  const fs: number = _font.size ?? 12;
+  const lh: number = _font.height ?? fs * (7 / 6);
 
-  const gravity = opt.valign();
-  const height = opt.height()();
-  const width = opt.width()(0);
+  const gravity: VAlignment = opt.valign;
 
-  const align = opt.align();
+  const height: number = typeof opt.height === 'function' ? opt.height() : opt.height;
+  const width: number = typeof opt.width === 'function' ? opt.width(0) : opt.width;
+  const xFn = typeof opt.x === 'function' ? opt.x : () => opt.x as number;
+
+  const align = opt.align;
   const justify = align === 'justify';
 
   // baseline adjustment for first line
@@ -36,15 +42,20 @@ export function renderCanvas (lines, opt, ctx) {
     adj += (height * m) - (th * m);
   }
 
+  let underlineLast: null | [ number, number ];
+
   lines.forEach((line, line_nr) => {
-    let x = opt.x()(line_nr);
+    underlineLast = null;
+    let x = xFn(line_nr);
     const y = line_nr * lh + adj;
 
     // compute the line's width and count number of whitespace gaps
     let wsCount = 0;
     let lineWidthAll = 0;
     line.forEach(token => {
-      if (token.whitespace) { wsCount++; }
+      if (token.whitespace) {
+        wsCount++;
+      }
       lineWidthAll += token.width;
     });
 
@@ -57,12 +68,12 @@ export function renderCanvas (lines, opt, ctx) {
       ws = missing / wsCount;
     }
 
-    line.forEach(token => {
+    for (const token of line) {
       // font and baseline
-      ctx.font = token.font;
+      ctx.font = fontToString(token.font);
       const font = token.font;
-      const dy = font.baseline ? (fs * -font.baseline) + (fs * 0.15) : 0;
-      ctx.fillStyle = getColor(font, token);
+      const dy = font.baseline ? (fs * -(font.baseline)) + (fs * 0.15) : 0;
+      ctx.fillStyle = getColor(font);
 
       let ax = 0;
       if (align === 'right') {
@@ -81,17 +92,25 @@ export function renderCanvas (lines, opt, ctx) {
       ctx.fillText(token.value, x + ax, y + dy);
 
       // render underline
-      if (token.href) {
+      if (token.font.href) {
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle;
         const uy = Math.floor(y + fs * 0.45) + 0.5;
-        ctx.moveTo(x + ax, uy);
+        if (!underlineLast) {
+          // we track the last underline end pos so that we draw an unbroken
+          // line even if extra word spacing is used (as with justified text)
+          underlineLast = [ x + ax, uy ];
+        }
+        ctx.moveTo(...underlineLast);
         ctx.lineTo(x + ax + token.width, uy);
         ctx.stroke();
+      }
+      else {
+        underlineLast = null;
       }
 
       // advance x position
       x += token.width;
-    });
+    }
   });
 }

@@ -1,3 +1,5 @@
+import type { FontProps } from './types.js';
+
 const re_fontstring = /^((?:[a-z\d-]+\s+)*)([\d.]+(%|em|px)|(?:x+-)?large|(?:x+-)?small|medium)(?:\s*\/\s*(normal|[\d.]+(%|px|em)?))?(\s.+)?$/;
 const re_small_caps = /\bsmall-caps\b/;
 const re_italics = /\b(?:italic|oblique)\b/;
@@ -19,35 +21,20 @@ const absSide = {
   'xx-large': 32
 };
 
-/**
- * @typedef FontParseData
- * @prop {string} family
- * @prop {import("./types.js").FontStyle} style
- * @prop {import("./types.js").FontVariant} variant
- * @prop {number} weight
- * @prop {number} [height]
- * @prop {number} size
- */
+const fontCache = new Map<string, FontProps>();
 
-const fontCache = new Map();
-
-/**
- * @param {string} str
- * @return {FontParseData | void}
- */
-export function fontStringParser (str) {
+export function fontStringParser (str: string): FontProps {
   if (fontCache.has(str)) {
-    return fontCache.get(str);
+    return fontCache.get(str)!;
   }
 
   const m = re_fontstring.exec(str);
   if (!m) {
-    return;
+    // FIXME: throw?
+    return {};
   }
 
-  /** @type {FontParseData} */
-  const p = {};
-  p.family = (m[6] || '').trim();
+  const family = (m[6] || '').trim();
 
   // font size
   let size = absSide[m[2]] || parseFloat(m[2]);
@@ -60,46 +47,51 @@ export function fontStringParser (str) {
   else if (m[3] === 'pt') {
     size *= ptSize;
   }
-  p.size = size;
 
   // line height
+  let height: number | undefined;
   if (m[4] === 'normal' || m[4] === 'inherit' || !m[4]) {
     // no height defined
-    p.height = Math.round(size * (7 / 6));
+    height = Math.round(size * (7 / 6));
   }
   else if (!m[5] || m[5] === 'em') {
     // height is unitless or in ems
-    p.height = parseFloat(m[4] || '') * size;
+    height = parseFloat(m[4] || '') * size;
   }
   else if (m[5] === 'pt') {
-    p.height = parseFloat(m[4] || '') * ptSize;
+    height = parseFloat(m[4] || '') * ptSize;
   }
   else if (m[5] === '%') {
-    p.height = size * 0.01;
+    height = size * 0.01;
   }
   else {
-    p.height = parseFloat(m[4] || '');
+    height = parseFloat(m[4] || '');
   }
 
-  p.variant = re_small_caps.test(m[1]) ? 'small-caps' : 'normal';
-  p.style = re_italics.test(m[1]) ? 'italic' : 'normal';
+  const variant = re_small_caps.test(m[1]) ? 'small-caps' : 'normal';
+  const style = re_italics.test(m[1]) ? 'italic' : 'normal';
 
   // bold
+  let weight = 400;
   if (re_bold.test(m[1])) {
-    p.weight = 700;
+    weight = 700;
   }
   // (numberic tokens 550+ = bold)
   else {
     const mx = /\b(\d+)\b/.exec(m[1]);
-    const weight = mx ? parseInt(mx[1], 10) : 400;
-    if (weight >= 100 && weight !== 400) {
-      p.weight = weight;
-    }
-    else {
-      p.weight = 400;
-    }
+    const w = mx ? parseInt(mx[1], 10) : 400;
+    weight = (w >= 100 && w !== 400) ? w : 400;
   }
 
-  fontCache.set(str, p);
-  return p;
+  const out: FontProps = {
+    family,
+    size,
+    height: height ?? size * (7 / 6),
+    weight,
+    variant,
+    style
+  };
+
+  fontCache.set(str, out);
+  return out;
 }

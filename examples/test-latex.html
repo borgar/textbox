@@ -2,13 +2,15 @@
 <meta charset=utf-8 />
 <script src="nav.js"></script>
 <link rel="stylesheet" href="example.css" />
-<script src="textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 <body>
 <h1>
 <span style="font-family:serif;">L<span style="text-transform: uppercase; font-size: 70%; margin-left: -0.36em; vertical-align: 0.3em; line-height: 0; margin-right: -0.15em;">a</span>T<span style="text-transform: uppercase; margin-left: -0.1667em; vertical-align: -0.5ex; line-height: 0; margin-right: -0.125em;">e</span>X</span>
 syntax support</h1>
-<div id="output"></div>
-<script>
+<div id="output" style="outline: 1px dotted silver;"></div>
+<script type="module">
+import { Textbox } from '@borgar/textbox';
+
 const width = 600;
 
 const box = new Textbox({
@@ -25,7 +27,7 @@ fetch('./text/latex-example.tex')
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', width);
     svg.setAttribute('height', lines.height);
-    svg.appendChild(lines.svg());
+    svg.appendChild(box.renderSVG(lines));
 
     document.querySelector('#output').appendChild(svg);
   });

@@ -2,11 +2,13 @@
 <meta charset=utf-8 />
 <script src="nav.js"></script>
 <link rel="stylesheet" href="example.css" />
-<script src="/textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 
 <h1>Rendering to a canvas</h1>
 <canvas style="border: 1px solid #888"></canvas>
-<script>
+<script type="module">
+import { Textbox } from '@borgar/textbox';
+
 const canvas = document.querySelector('canvas');
 const dpr = window.devicePixelRatio || 1;
 const ctx = canvas.getContext('2d');
@@ -32,17 +34,19 @@ ctx.restore();
 const box = new Textbox({
   width: width,
   height: height,
-  parser: 'html',
+  parser: Textbox.htmlparser,
   font: '16px/22px Tahoma, sans-serif'
 });
 
 fetch('./text/canvas.html')
   .then(d => d.text())
-  .then(d => box.render(d, ctx));
+  .then(d => box.renderCanvas(d, ctx));
 </script>
 
 <div id="about">
-<p>This example demonstates a how text is rendered to canvas in the most simple way. Most of the code to generate this deals with setting up the canvas and the border. Here is what is needed when the extras have been removed:</p>
+<p>This example demonstates a how text is rendered to canvas in the most simple way.
+  Most of the code to generate this deals with setting up the canvas and the border.
+  Here is what is needed when the extras have been removed:</p>
 <pre>
 const canvas = document.querySelector('canvas');
 canvas.width = 480;

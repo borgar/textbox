@@ -1,43 +1,38 @@
-import { Font } from './Font.js';
-import { whitespace } from './whitespace.js';
-import { measureText } from './measureText.js';
-import { Token, Break, LineBreak, SoftHyphen } from './parser/tokens.js';
+import { WHITESPACE } from './constants.ts';
+import { fontStringParser } from './fontStringParser.ts';
+import { measureText } from './measureText.ts';
+import { Token, Break, LineBreak, SoftHyphen } from './parser/tokens.ts';
+import type { FontProps, LayoutOptions, Line, Lines, NumberFunc, NumberLineFunc } from './types.ts';
 
 const re_whitespace = /[\r\n\xA0]+/g;
-const subscript_size = 0.7;
 
-// return a font style decl. based on the current token
-function get_font (token, basefont) {
-  // translate sub/super into scaled text
-  if (token.sup) {
-    token.baseline = 0.45;
-    token.size = subscript_size;
-  }
-  if (token.sub) {
-    token.baseline = -0.3;
-    token.size = subscript_size;
-  }
-  // FIXME: token.italic => token.style = 'italic'
-  // FIXME: token.bold => token.weight = 'bold'
-  let r = basefont;
-  // can shortcut to default obj?
-  if (token.style || token.weight ||
-      token.baseline || token.color ||
-      token.size || token.family) {
-    r = basefont.assign(token);
-  }
-  return r;
+function mergeFont (baseFont: FontProps, currentFont: FontProps): FontProps {
+  return {
+    family: currentFont.family ?? baseFont.family ?? 'sans-serif',
+    style: currentFont.style ?? baseFont.style ?? 'normal',
+    variant: currentFont.variant ?? baseFont.variant ?? 'normal',
+    weight: currentFont.weight ?? baseFont.weight ?? 400,
+    height: currentFont.height ?? baseFont.height ?? 14,
+    size: currentFont.size ?? baseFont.size ?? 12,
+    sizeAdjust: currentFont.sizeAdjust ?? baseFont.sizeAdjust ?? undefined,
+    baseline: currentFont.baseline ?? baseFont.baseline ?? 0,
+    tracking: currentFont.tracking ?? baseFont.tracking ?? 0,
+    href: currentFont.href ?? baseFont.href ?? '',
+    color: currentFont.color ?? baseFont.color ?? '',
+    rel: currentFont.rel ?? baseFont.rel ?? '',
+    target: currentFont.target ?? baseFont.target ?? '',
+    class: currentFont.class ?? baseFont.class ?? ''
+  };
 }
 
-function overflow_line (target_line, target_width, token) {
+function overflow_line (target_line: Line, target_width: number, token: Token) {
   let line_width = target_line.width;
-  let last;
-  let temp;
-  while (line_width + token.width > target_width &&
-          target_line.length) {
+  let last: Token | undefined;
+  let temp: number;
+  while (line_width + token.width > target_width && target_line.length) {
     last = target_line[target_line.length - 1];
-    temp = last.width;
-    if (last.width > token.width) {
+    temp = last.width ?? 0;
+    if (last.width && last.width > token.width) {
       // reduce the token while possible
       last.value = last.value.slice(0, -1);
       last.width = measureText(last, last.font);
@@ -54,20 +49,18 @@ function overflow_line (target_line, target_width, token) {
     target_line.pop();
   }
 
-  // it is possible that the last line is empty, because of LineBreaks
-  last = target_line[target_line.length - 1] || last || {};
-  token.font = token.font.assign(last);
-  token.href = target_line.length ? last.href : null;
-  token.rel = target_line.length ? last.rel : null;
-  token.target = target_line.length ? last.target : null;
-  target_line.push(token);
+  if (last) {
+    // it is possible that the last line is empty, because of LineBreaks
+    last = target_line[target_line.length - 1] || last || {};
+    token.font = Object.create(last.font);
+    token.font.href = target_line.length ? last.font.href : undefined;
+    token.font.rel = target_line.length ? last.font.rel : undefined;
+    token.font.target = target_line.length ? last.font.target : undefined;
+    target_line.push(token);
+  }
 }
 
-/**
- * @param {Font} f_base
- * @return {import('./types.js').Lines}
- */
-function getEmptyLines (f_base) {
+function getEmptyLines (f_base: FontProps): Lines {
   return Object.assign([], {
     height: 0,
     font: f_base,
@@ -77,45 +70,37 @@ function getEmptyLines (f_base) {
   });
 }
 
-/**
- * @typedef LineBreakOpts
- * @prop {() => (() => number)} height
- * @prop {() => ((i: number) => number)} width
- * @prop {() => string} overflowLine
- * @prop {() => string} overflowWrap
- * @prop {() => string} overflow
- */
-
-/**
- * @typedef BreakPoint
- * @prop {number} index
- * @prop {number} width
- */
+type BreakPoint = {
+  index: number;
+  width: number;
+};
 
 /**
  * WARNING: this method is destructive to the tokens
- *
- * @param {Token[]} tokens
- * @param {LineBreakOpts} opt
- * @param {Font} f_base
- * @return {import('./types.js').Lines}
  */
-export function linebreak (tokens, opt, f_base) {
+export function linebreak (tokens: Token[], opts: LayoutOptions): Lines {
+  const f_base = fontStringParser(opts.font);
   if (!tokens.length) {
     return getEmptyLines(f_base);
   }
 
-  const height = opt.height();
-  const width = opt.width();
-  const lineclamp = opt.overflowLine();
-  const wrapMode = opt.overflowWrap();
+  const height: NumberFunc = typeof opts.height === 'function'
+    ? opts.height
+    : () => opts.height as number;
+  const width: NumberLineFunc = typeof opts.width === 'function'
+    ? opts.width
+    : () => opts.width as number;
+  const lineclamp = opts.overflowLine;
+  const wrapMode = opts.overflowWrap;
 
   // fonts
-  const f_bold = f_base.assign({ bold: true });
+  const f_bold = { ...f_base, weight: 700 };
+  const fHeight = f_base.height ?? f_base.size ?? 12;
 
   const max_lines = isFinite(height())
-    ? Math.floor(height() / f_base.height)
+    ? Math.floor(height() / fHeight)
     : Infinity;
+
   // skip the work for things what will never show anyway
   if ((!height() && !width(0)) || !max_lines) {
     return getEmptyLines(f_base);
@@ -124,19 +109,18 @@ export function linebreak (tokens, opt, f_base) {
   let index = 0;
   let line_index = 0;
   let line_width = 0;
-  const final_breaks = [];
-  /** @type {BreakPoint[]} */
-  let possible_breaks = [];
+  const final_breaks: number[] = [];
+  let possible_breaks: BreakPoint[] = [];
   let last_was_whitespace = false;
 
   while (index < tokens.length && line_index < max_lines) {
     const token = tokens[index];
-    const font_inst = get_font(token, f_base); // don't need this for Break or LineBreak
+    const font_inst = mergeFont(f_base, token.font); // XXX: don't need this for Break or LineBreak
 
     token.width = measureText(token, font_inst);
     token.font = font_inst;
     token.line = line_index;
-    token.whitespace = token.value in whitespace;
+    token.whitespace = token.value in WHITESPACE;
 
     if (token.value) {
       // normalize whitespace (SVG doesn't "space" \n like HTML does)
@@ -194,15 +178,15 @@ export function linebreak (tokens, opt, f_base) {
       }
     }
     else {
-      let break_rep;
-      let break_accepted;
+      let break_rep: BreakPoint;
+      let break_accepted: boolean;
       // seek backwards through the breakpoints in the line
       // and determine if any of them are suitable
       do {
         break_accepted = true;
-        break_rep = /** @type {BreakPoint} */(possible_breaks.pop());
-        const break_token = /** @type {Token} */(tokens[break_rep.index]);
-        let hyp_width;
+        break_rep = possible_breaks.pop()!;
+        const break_token: Token = tokens[break_rep.index];
+        let hyp_width: number;
         if (break_token instanceof SoftHyphen) {
           hyp_width = measureText('-', break_token.font || f_base);
           if (break_rep.width + hyp_width > width(line_index)) {
@@ -236,14 +220,14 @@ export function linebreak (tokens, opt, f_base) {
   const lines = final_breaks.map(p => {
     // find first token that is not "junk"
     let s = last_break;
-    let t;
+    let t: Token;
     while ((t = tokens[s]) && (t.whitespace || !t.value)) {
       // this trims breaks and whitespace from the start of the line
       s++;
     }
     // find last token that is not "junk"
     let e = p;
-    let hardbreak = null;
+    let hardbreak: Token | null = null;
     while ((e > s) && (t = tokens[e - 1]) &&
       (t.whitespace || !(t.value || t instanceof SoftHyphen))) {
       // this trims breaks and whitespace from the end of the line
@@ -269,7 +253,7 @@ export function linebreak (tokens, opt, f_base) {
       line.push(hardbreak);
     }
     // keep track of line widths
-    line.width = line.reduce((a, d) => a + d.width, 0);
+    line.width = line.reduce((a, d) => a + (d.width || 0), 0);
     if (line.width > widest) {
       widest = line.width;
     }
@@ -294,7 +278,7 @@ export function linebreak (tokens, opt, f_base) {
 
   // overflow needed?
   let hasOverflow = false;
-  const overflow = (opt.overflow() === 'ellipsis') ? '…' : opt.overflow();
+  const overflow = (opts.overflow === 'ellipsis') ? '…' : opts.overflow;
   if (overflow && index !== tokens.length) {
     const line_width = width(lines.length - 1);
     const last_line = lines[lines.length - 1];
@@ -309,7 +293,7 @@ export function linebreak (tokens, opt, f_base) {
   }
 
   return Object.assign(lines, {
-    height: lines.length * f_base.height,
+    height: lines.length * fHeight,
     font: f_base,
     width: widest,
     hasOverflow,

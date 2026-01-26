@@ -1,4 +1,4 @@
-export const whitespace = {
+export const WHITESPACE = {
   '\u000A': 0.28, //
   '\u000D': 0.28, //
   '\u0020': 0.28, // SPACE
