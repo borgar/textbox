@@ -1,0 +1,82 @@
+import { Token, Break, SoftHyphen } from './tokens.ts';
+
+const re_whitespace = /^[\n\r\t\x20\xA0\u2000-\u200B\u205F\u3000]/;
+const re_chars2n = /^[^\n\r\t\u0020\u2000-\u200B\u205F\u3000]{2,}/;
+const re_nobreak = /^[\xA0\u2011\u202F\u2060\uFEFF]/;
+const re_break_after = /^(?:[;\xAD%?…]|,(?!\d))/;
+const re_break_before = /^[´±°¢£¤$¥\u2212]/;
+
+const left_symbols = "'“‘[「【﹝〔<‹«{『（(<《".split('');
+const right_symbols = "',，,！!?？”]」】》>’»﹞〕〗〉})）』。".split('');
+
+const isCJKCommon = (char: string): boolean => {
+  const code = char.charCodeAt(0);
+  return code >= 0x4E00 && code <= 0x9FFF;
+};
+
+/**
+ * A basic text parser that sections texts into words but also
+ * deals with inserting appropriate breaks at correct points.
+ */
+export function textparser (text?: string | null): Token[] {
+  text = text || '';
+  const tokens: Token[] = [];
+  let last_ch = text.charAt(0);
+  let curr_ch: string = '';
+  let next_ch: string = '';
+  let p = 0;
+  for (let i = 1, l = text.length; i < l; i++) {
+    curr_ch = text.charAt(i);
+    next_ch = text.charAt(i + 1);
+
+    const last_is_ws = re_whitespace.test(last_ch);
+    const curr_is_ws = re_whitespace.test(curr_ch);
+    // Chinese text can be wrapped at any point between letter characters.
+    let allow_break = curr_is_ws || last_is_ws || isCJKCommon(last_ch) || isCJKCommon(curr_ch);
+
+    if ((re_break_before.test(curr_ch) && !re_nobreak.test(last_ch)) ||
+         (re_break_after.test(last_ch + next_ch) && !re_nobreak.test(curr_ch))) {
+      allow_break = true;
+    }
+
+    // The symbol on the left must wrap with the text on its right.
+    // Likewise, the symbol on the right must wrap with the text on its left.
+    if (allow_break && (right_symbols.includes(curr_ch) || left_symbols.includes(last_ch))) {
+      allow_break = false;
+    }
+
+    // slighly more complicated case: hyphens
+    if (
+      last_ch === '\u002D' || // - ASCII dash
+      last_ch === '\u2010' || // ‐ Unicode hyphen
+      last_ch === '\u2013' || // – En dash
+      last_ch === '\u2014' // — Em dash
+    ) {
+      const pre_last_is_ws = re_whitespace.test(text.charAt(i - 2));
+      if (pre_last_is_ws && !curr_is_ws) {
+        allow_break = false;
+      }
+      if (!pre_last_is_ws && re_chars2n.test(curr_ch + next_ch)) {
+        allow_break = true;
+      }
+    }
+
+    if (allow_break) {
+      const s = text.slice(p, i);
+      if (s.endsWith('\u00AD')) { // ends in a S-HY ?
+        tokens.push(new Token(s.slice(0, -1)));
+        tokens.push(new SoftHyphen());
+      }
+      else {
+        tokens.push(new Token(s));
+        tokens.push(new Break());
+      }
+      p = i;
+    }
+    last_ch = curr_ch;
+  }
+
+  tokens.push(new Token(text.slice(p)));
+
+  return tokens;
+}

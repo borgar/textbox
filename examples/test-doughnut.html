@@ -2,7 +2,7 @@
 <meta charset=utf-8 />
 <script src="nav.js"></script>
 <link rel="stylesheet" href="example.css" />
-<script src="/textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 <body>
 
 <h1>Text within a doughnut</h1>
@@ -15,7 +15,9 @@
   </g>
 </svg>
 
-<script>
+<script type="module"">
+import { Textbox } from '@borgar/textbox';
+
 const lorem = "Lorem ipsum dolor sit amet, \
 con­sect­etur adi­pisic­ing elit, sed do eius­mod \
 tempor in­cidi­dunt ut labore et dolore magna \

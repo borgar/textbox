@@ -2,7 +2,7 @@
 <meta charset=utf-8 />
 <script src="nav.js"></script>
 <link rel="stylesheet" href="example.css" />
-<script src="textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 <body>
 <h1>Long text on SVG and canvas</h1>
 <style>
@@ -18,7 +18,9 @@ svg, canvas {
 <label><input type="radio" name="align" value="right" /> Right</label>
 <label><input type="radio" name="align" checked value="justify" /> Justify</label>
 </form>
-<script>
+<script type="module">
+import { Textbox, htmlparser } from '@borgar/textbox';
+
 const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 let text = '';
 
@@ -37,7 +39,7 @@ function render () {
     font: `${fontSize}px/${lineHeight}px sans-serif`,
     align: align,
     width: width,
-    parser: Textbox.htmlparser
+    parser: htmlparser
   });
   const lines = box.linebreak(text);
 
@@ -65,7 +67,7 @@ function render () {
   context.restore();
   // render text
   context.translate(10, 10);
-  lines.render(context);
+  box.renderCanvas(lines, context);
 
   // ====
   // Render the text as an SVG
@@ -86,7 +88,7 @@ function render () {
       height: height
     }),
     createElement('g', { transform: `translate(${margin.left},${margin.top})` },
-      lines.render()
+      box.renderSVG(lines)
     )
   );
   svg.style.display = 'inline-block';

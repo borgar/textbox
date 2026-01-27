@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset=utf-8 />
 <script src="nav.js"></script>
-<script src="/textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 
 <link rel="stylesheet" href="example.css" />
 
@@ -87,7 +87,7 @@ svg a {
 </style>
 <body>
 <h1>Layout options tester</h1>
-<form onchange="update();">
+<form id="inputs">
 <fieldset>
   <legend>Box</legend>
 
@@ -106,14 +106,12 @@ svg a {
 
   <label>
     <span>Width</span>
-    <input type="range" value="200" min="0" max="300" step="1"
-        oninput="update();" id="width" name="width">
+    <input type="range" value="200" min="0" max="300" step="1" id="width" name="width">
   </label>
 
   <label>
     <span>Height</span>
-    <input type="range" value="221" min="0" max="300" step="1"
-        oninput="update();" id="height" name="height">
+    <input type="range" value="221" min="0" max="300" step="1" id="height" name="height">
   </label>
 
 </fieldset>
@@ -137,12 +135,12 @@ svg a {
 
   <label>
     <span>Size</span>
-    <input type="range" value="13" min="10" max="20" step="1" oninput="update();" id="size" name="size">
+    <input type="range" value="13" min="10" max="20" step="1" id="size" name="size">
   </label>
 
   <label>
     <span>Leading</span>
-    <input type="range" value="17" min="10" max="24" step="1" oninput="update();" id="leading" name="leading">
+    <input type="range" value="17" min="10" max="24" step="1" id="leading" name="leading">
   </label>
 
   <label>
@@ -188,7 +186,7 @@ svg a {
 
   <label>
     <span>Angle</span>
-    <input type="range" value="0" min="-180" max="180" step="0" oninput="update();" id="rotate" name="rotate">
+    <input type="range" value="0" min="-180" max="180" step="0" id="rotate" name="rotate">
   </label>
 
 </fieldset>
@@ -209,18 +207,20 @@ svg a {
   <canvas width="300" height="300"></canvas>
 </div>
 
-<script>
+<script type="module">
 /* globals d3 */
 /* eslint-disable indent */
+import { Textbox, Rotator, textparser, htmlparser, latexparser } from '@borgar/textbox';
+
 const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 const width = 300;
 const height = 300;
 
 const texts = {};
 const extToParser = {
-  'txt': Textbox.textparser,
-  'html': Textbox.htmlparser,
-  'tex': Textbox.latexparser
+  'txt': textparser,
+  'html': htmlparser,
+  'tex': latexparser
 };
 
 const canvas = document.querySelector('canvas');
@@ -282,7 +282,7 @@ function update () {
     document.querySelector('#rotate').value = deg;
   }
 
-  const rot = new Textbox.Rotator({
+  const rot = new Rotator({
     width: w,
     height: h,
     rotate: deg,
@@ -301,15 +301,14 @@ function update () {
 
   const textbox = document.querySelector('#textbox');
   textbox.innerHTML = '';
-  textbox.appendChild(rot.render(box.render(passage)));
+  textbox.appendChild(rot.renderSVG(box.renderSVG(passage)));
 
   // draw a bounding frame
-  const anchor = rot.anchor();
   const frame = document.querySelector('#bbox');
   frame.setAttribute('width', w);
   frame.setAttribute('height', h);
-  frame.setAttribute('x', anchor[0]);
-  frame.setAttribute('y', anchor[1]);
+  frame.setAttribute('x', rot.origin[0]);
+  frame.setAttribute('y', rot.origin[1]);
   frame.setAttribute('transform', `rotate(${rot.rotate()})`);
 
   // render canvas
@@ -328,8 +327,8 @@ function update () {
 
   context.translate(width / 2, height / 2);
 
-  rot.render(ctx => {
-    box.render(ctx, passage);
+  rot.renderCanvas(ctx => {
+    box.renderCanvas(passage, ctx);
 
     context.strokeStyle = 'red';
     context.strokeDashArray = '2 2';
@@ -359,8 +358,10 @@ Promise.all(
     return a;
   }, texts);
 })
-.then(update);
-
+.then(() => {
+  document.querySelector('form#inputs').addEventListener('input', update);
+  update();
+});
 
     </script>
 

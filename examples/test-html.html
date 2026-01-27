@@ -4,8 +4,11 @@
 <link rel="stylesheet" href="example.css" />
 <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-<script src="/textbox.js"></script>
+<script type="importmap">{ "imports": { "@borgar/textbox": "../dist/index.js" } }</script>
 <style>
+svg {
+  outline: 1px dotted silver;
+}
 svg a {
   fill: blue;
   text-decoration: none;
@@ -23,7 +26,9 @@ svg a {
 <body>
 <h1>HTML syntax support</h1>
 <div id="output"></div>
-<script>
+<script type="module">
+import { Textbox, htmlparser } from '@borgar/textbox';
+
 const margin = { top: 1, right: 1, bottom: 1, left: 1 };
 const width = 600;
 
@@ -31,7 +36,7 @@ const width = 600;
 const box = new Textbox({
   font: '14px/18px sans-serif',
   width: width,
-  parser: Textbox.htmlparser,
+  parser: htmlparser,
   createElement: React.createElement
 });
 
@@ -48,7 +53,7 @@ fetch('./text/html-example.html')
       width: width + margin.left + margin.right,
       height: lines.height + margin.top + margin.bottom
     }, createElement('g', { transform: `translate(${margin.left},${margin.top})` },
-        lines.svg()
+        box.render(lines)
       )
     );
     ReactDOM.render(svg, document.querySelector('#output'));
