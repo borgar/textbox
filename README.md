@@ -2,7 +2,7 @@
 
 Textbox is a simple library to layout multiline text for display on SVG or Canvas. It can fairly decently line-break and render rich text given some boundaries. It understands simple text, and a small subset of HTML and LaTeX syntaxes. The original purpose of this software is to aid labeling charts.
 
-Take a look at [Textbox example and demos](https://observablehq.com/collection/@borgar/textbox) if you are curious what this library can do.
+Take a look at [Textbox example and demos](https://borgar.github.io/textbox) if you are curious what this library can do.
 
 
 #### Features:
@@ -52,7 +52,7 @@ const box = new Textbox()
 ```
 
 
-Full API documentation can be found in [docs/API.md](./docs/API.md).
+Full API documentation can be found in [api-docs/API.md](./api-docs/API.md).
 
 
 

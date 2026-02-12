@@ -17,7 +17,7 @@
     "build": "tsup",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "docs": "typedoc && concat-md tempdocs > docs/API.md && rm -rf tempdocs",
+    "docs": "typedoc && concat-md tempdocs > api-docs/API.md && rm -rf tempdocs",
     "test": "vitest --run",
     "check": "npm run test && npm run lint && npm run typecheck",
     "release": "git diff --exit-code && tsup && npm publish && V=$(jq -r .version package.json) && git tag -a $V -m $V && git push origin $V && gh release create $V --generate-notes"
