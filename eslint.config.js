@@ -16,7 +16,10 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: { ...globals.browser },
-      parserOptions: { projectService: { allowDefaultProject: [ 'tsdown.config.ts' ] } }
+      parserOptions: { projectService: { allowDefaultProject: [
+        'tsdown.config.ts',
+        'eslint.config.js'
+      ] } }
     }
   },
   eslint.configs.recommended,
@@ -31,7 +34,7 @@ export default defineConfig([
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/prefer-optional-chain': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
-      '@typescript-eslint/no-this-alias': 'off',
+      '@typescript-eslint/no-this-alias': 'off'
     }
   }
 ]);

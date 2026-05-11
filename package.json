@@ -45,17 +45,18 @@
   ],
   "author": "Borgar <borgar@borgar.net>",
   "devDependencies": {
-    "@borgar/eslint-config": "^4.0",
-    "@stylistic/eslint-plugin": "~5.7.1",
+    "@borgar/eslint-config": "^4.1",
+    "@eslint/js": "~10.0.1",
+    "@stylistic/eslint-plugin": "~5.10.0",
     "concat-md": "~0.5.1",
-    "eslint": "^9.39.2",
-    "eslint-plugin-jsdoc": "~62.4.1",
-    "globals": "~17.1.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-jsdoc": "~62.9.0",
+    "globals": "~17.6.0",
     "tsdown": "~0.22.0",
-    "typedoc": "~0.28.16",
-    "typedoc-plugin-markdown": "~4.9.0",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "~8.53.1",
-    "vitest": "~4.0.18"
+    "typedoc": "~0.28.19",
+    "typedoc-plugin-markdown": "~4.11.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "~8.59.2",
+    "vitest": "~4.1.6"
   }
 }

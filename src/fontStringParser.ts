@@ -72,7 +72,7 @@ export function fontStringParser (str: string): FontProps {
   const style = re_italics.test(m[1]) ? 'italic' : 'normal';
 
   // bold
-  let weight = 400;
+  let weight: number;
   if (re_bold.test(m[1])) {
     weight = 700;
   }

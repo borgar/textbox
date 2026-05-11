@@ -174,7 +174,7 @@ export function latexparser (text?: string | null): Token[] {
         lt.font.baseline = -0.22;
         lt.font.tracking = -0.13;
 
-        lt = self.add_token(new Token('X'));
+        self.add_token(new Token('X'));
         self.close_context();
       }
       else if (cmd in LATEX_ENTITIES) {
@@ -189,7 +189,6 @@ export function latexparser (text?: string | null): Token[] {
         let arg: RegExpExecArray | null;
         if (narg) {
           // ignore matched context
-          ctx = false;
           text = text.slice(m[0].length - 1);
           while (narg--) { // expect a parameter
             if ((arg = /^\{([^}]+)\}/.exec(text))) {

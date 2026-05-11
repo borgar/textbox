@@ -285,7 +285,7 @@ export function linebreak (tokens: Token[], opts: LayoutOptions): Lines {
   }
 
   // overflow needed?
-  let hasOverflow = false;
+  let hasOverflow: boolean;
   const overflow = (opts.overflow === 'ellipsis') ? '…' : opts.overflow;
   if (overflow && index !== tokens.length) {
     const line_width = width(lines.length - 1);

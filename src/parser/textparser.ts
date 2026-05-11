@@ -22,8 +22,8 @@ export function textparser (text?: string | null): Token[] {
   text = text || '';
   const tokens: Token[] = [];
   let last_ch = text.charAt(0);
-  let curr_ch: string = '';
-  let next_ch: string = '';
+  let curr_ch: string;
+  let next_ch: string;
   let p = 0;
   for (let i = 1, l = text.length; i < l; i++) {
     curr_ch = text.charAt(i);
