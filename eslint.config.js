@@ -16,7 +16,7 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: { ...globals.browser },
-      parserOptions: { projectService: { allowDefaultProject: [] } }
+      parserOptions: { projectService: { allowDefaultProject: [ 'tsdown.config.ts' ] } }
     }
   },
   eslint.configs.recommended,

@@ -3,24 +3,27 @@
   "description": "A utility to render formatted multi-line rich text.",
   "version": "2.0.0",
   "license": "BSD-3-Clause",
-  "main": "dist/index.cjs",
   "type": "module",
   "types": "dist/index.d.cts",
+  "module": "dist/index.js",
+  "main": "dist/index.cjs",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
       "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "docs": "typedoc && concat-md tempdocs > api-docs/API.md && rm -rf tempdocs",
     "test": "vitest --run",
     "check": "npm run test && npm run lint && npm run typecheck",
-    "release": "git diff --exit-code && tsup && npm publish && V=$(jq -r .version package.json) && git tag -a $V -m $V && git push origin $V && gh release create $V --generate-notes"
+    "release": "git diff --exit-code && tsdown && npm publish && V=$(jq -r .version package.json) && git tag -a $V -m $V && git push origin $V && gh release create $V --generate-notes"
   },
   "files": [
     "docs/*.md",
@@ -40,19 +43,6 @@
     "canvas",
     "svg"
   ],
-  "tsup": {
-    "entry": [
-      "src/index.ts"
-    ],
-    "target": "node16",
-    "format": [
-      "cjs",
-      "esm"
-    ],
-    "sourcemap": true,
-    "clean": true,
-    "dts": true
-  },
   "author": "Borgar <borgar@borgar.net>",
   "devDependencies": {
     "@borgar/eslint-config": "^4.0",
@@ -61,7 +51,7 @@
     "eslint": "^9.39.2",
     "eslint-plugin-jsdoc": "~62.4.1",
     "globals": "~17.1.0",
-    "tsup": "~8.5.1",
+    "tsdown": "~0.22.0",
     "typedoc": "~0.28.16",
     "typedoc-plugin-markdown": "~4.9.0",
     "typescript": "~5.9.3",
