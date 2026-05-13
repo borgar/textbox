@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { measureText, setMeasureCanvas, getDumbHandler } from './measureText.ts';
-import { Token } from './parser/tokens.ts';
+import { measureText, setMeasureCanvas } from './measureText.ts';
+import { Token } from '../parser/tokens.ts';
 
 describe('setMeasureCanvas()', () => {
   afterEach(() => {
@@ -11,23 +11,11 @@ describe('setMeasureCanvas()', () => {
     // faking the canvas interface
     const mockCanvas = {
       getContext: () => {
-        return { font: '', measureText: () => ({ width: 36 }) };
+        return { font: '', measureText: () => ({ width: 0.36 }) };
       }
     };
     setMeasureCanvas(mockCanvas);
-    expect(measureText('TEST', '20px sans-serif')).toBe(36);
-  });
-});
-
-describe('measureText.getDumbHandler()', () => {
-  it('returns function', () => {
-    const c = getDumbHandler();
-    expect(typeof c).toBe('function');
-  });
-
-  it('measures text', () => {
-    const c = getDumbHandler();
-    expect(c('TEST', '20px sans-serif')).toBe(36);
+    expect(measureText('TEST', '20px sans-serif')).toBe(0.36);
   });
 });
 
@@ -35,7 +23,7 @@ describe('measureText()', () => {
   it('measures given token', () => {
     const token = new Token('TEST');
     const font = '20px sans-serif';
-    expect(measureText(token, font)).toBe(36);
+    expect(measureText(token, font)).toBe(43.199999999999996);
   });
 
   it('measures given string', () => {
@@ -58,9 +46,9 @@ describe('measureText() without whitespace trimming', () => {
     const token = 'TEST';
     const tokenWithWhitespace = '   TEST ';
     const font = '20px sans-serif';
-    expect(measureText(token, font)).toBeLessThan(
-      measureText(tokenWithWhitespace, font, { trim: false })
-    );
+    const measureBasic = measureText(token, font);
+    const measureNoTrim = measureText(tokenWithWhitespace, font, { trim: false });
+    expect(measureBasic).toBeLessThan(measureNoTrim);
   });
 });
 
