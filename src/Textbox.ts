@@ -2,7 +2,7 @@
 import { linebreak } from './linebreak.js';
 import { renderSVG } from './renderSVG.js';
 import { renderCanvas } from './renderCanvas.ts';
-import { measureText, setMeasureCanvas } from './measureText.js';
+import { measureText, setMeasureCanvas } from './measureText/measureText.ts';
 import { createElement } from './createElement.ts';
 import { textparser } from './parser/textparser.ts';
 import { htmlparser } from './parser/htmlparser.ts';

@@ -1,6 +1,6 @@
 import { WHITESPACE } from './constants.ts';
 import { fontStringParser } from './fontStringParser.ts';
-import { measureText } from './measureText.ts';
+import { measureText } from './measureText/measureText.ts';
 import { Token, Break, LineBreak, SoftHyphen } from './parser/tokens.ts';
 import type { FontProps, LayoutOptions, Line, Lines, NumberFunc, NumberLineFunc } from './types.ts';
 

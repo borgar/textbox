@@ -2,8 +2,8 @@ import { Textbox } from './Textbox.ts';
 
 export { Textbox } from './Textbox.ts';
 export { Rotator } from './Rotator.ts';
-export { measureText } from './measureText.ts';
-export { setMeasureCanvas } from './measureText.ts';
+export { measureText } from './measureText/measureText.ts';
+export { setMeasureCanvas } from './measureText/measureText.ts';
 
 export { textparser } from './parser/textparser.ts';
 export { htmlparser } from './parser/htmlparser.ts';
